@@ -140,7 +140,9 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
         audio_paths, transcripts = self._parse_manifest_file(self.configs.dataset.manifest_file_path)
 
         rnd = random.Random(42)
-        audio_paths, transcripts = zip(*rnd.shuffle(list(zip(audio_paths, transcripts))))
+        tmp = list(zip(audio_paths, transcripts))
+        rnd.shuffle(tmp)
+        audio_paths, transcripts = zip(*tmp)
         
         train_end_idx = int(self.SLOVAKSPEECH_TRAIN_SPLIT * len(audio_paths))
         valid_end_idx = int((self.SLOVAKSPEECH_TRAIN_SPLIT + self.SLOVAKSPEECH_VALID_SPLIT) * len(audio_paths))
