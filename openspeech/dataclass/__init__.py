@@ -37,6 +37,7 @@ from .configurations import (
     LMConfigs,
     TPUResumeTrainerConfigs,
     TPUTrainerConfigs,
+    SlovakSpeechConfigs,
 )
 
 OPENSPEECH_TRAIN_CONFIGS = [
@@ -66,6 +67,7 @@ DATASET_DATACLASS_REGISTRY = {
     "ksponspeech": KsponSpeechConfigs,
     "librispeech": LibriSpeechConfigs,
     "lm": LMConfigs,
+    "slovakspeech": SlovakSpeechConfigs
 }
 TRAINER_DATACLASS_REGISTRY = {
     "cpu": CPUTrainerConfigs,

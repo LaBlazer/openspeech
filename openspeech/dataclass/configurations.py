@@ -112,6 +112,20 @@ class AIShellConfigs(OpenspeechDataclass):
         default="../../../data_aishell/aishell_manifest.txt", metadata={"help": "Path of manifest file"}
     )
 
+@dataclass
+class SlovakSpeechConfigs(OpenspeechDataclass):
+    """Configuration dataclass that common used"""
+
+    dataset: str = field(
+        default="slovakspeech", metadata={"help": "Select dataset for training (librispeech, ksponspeech, aishell, lm)"}
+    )
+    dataset_path: str = field(default=MISSING, metadata={"help": "Path of dataset"})
+    dataset_download: bool = field(
+        default=True, metadata={"help": "Flag indication whether to download dataset or not."}
+    )
+    manifest_file_path: str = field(
+        default="../../../data_slovakspeech/slovakspeech_manifest.txt", metadata={"help": "Path of manifest file"}
+    )
 
 @dataclass
 class LMConfigs(OpenspeechDataclass):

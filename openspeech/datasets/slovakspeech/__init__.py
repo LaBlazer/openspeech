@@ -19,34 +19,3 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-
-from setuptools import find_packages, setup
-
-setup(
-    name="openspeech-core",
-    version="0.4.0",
-    description="Open-Source Toolkit for End-to-End Automatic Speech Recognition",
-    author="Kim, Soohwan and Ha, Sangchun and Cho, Soyoung",
-    author_email="sh951011@gmail.com, seomk9896@gmail.com, soyoung.cho@kaist.ac.kr",
-    url="https://github.com/openspeech-team/openspeech",
-    download_url="https://github.com/openspeech-team/openspeech/releases/tag/v0.4.zip",
-    install_requires=[
-        "torch==1.11.0",
-        "levenshtein",
-        "numpy",
-        "pandas",
-        "astropy",
-        "sentencepiece",
-        "librosa==0.9.2",
-        "torchmetrics==0.6.0",
-        "pytorch-lightning==1.4.0",
-        "hydra-core",
-        "wget",
-        "wandb",
-    ],
-    packages=find_packages(exclude=[]),
-    keywords=["openspeech", "asr", "speech_recognition", "pytorch-lightning", "hydra"],
-    python_requires=">=3.7",
-    package_data={},
-    zip_safe=False,
-)
