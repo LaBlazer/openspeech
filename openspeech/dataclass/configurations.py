@@ -206,8 +206,8 @@ class BaseTrainerConfigs(OpenspeechDataclass):
         default="else", metadata={"help": "smart: batching with similar sequence length." 
                                           "else: random batch"}
     )
-    profiler: str = field(
-        default=MISSING, metadata={"help": "Profiler for training. (simple, advanced...)"}
+    profiler: Optional[str] = field(
+        default=None, metadata={"help": "Profiler for training. (simple, advanced...)"}
     )
 
 
