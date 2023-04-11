@@ -32,7 +32,7 @@ from omegaconf import DictConfig
 
 from openspeech.data.audio.data_loader import AudioDataLoader
 from openspeech.data.audio.dataset import SpeechToTextDataset
-from openspeech.data.sampler import RandomSampler, SmartBatchingSampler
+from openspeech.data.sampler import RandomSampler, SmartBatchingSampler, SmartBatchingDistributedSampler
 from openspeech.datasets import register_data_module
 from openspeech.datasets.slovakspeech.preprocess import read_transcripts, generate_manifest_file, generate_vocab_file
 from openspeech.datasets.slovakspeech.downloader import download
@@ -57,15 +57,24 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
         self.dataset = dict()
         self.logger = logging.getLogger(__name__)
 
+        if self.configs.trainer.strategy is not None:
+            self.sampler = SmartBatchingDistributedSampler
+        else:
+            self.sampler = SmartBatchingSampler if self.configs.trainer.sampler == "smart" else RandomSampler
+
     def _download_dataset(self) -> None:
         r"""Download datasets."""
         url = "https://lblzr.com/data/slovakspeech.tgz"
 
         if not os.path.exists(self.configs.dataset.dataset_path):
             os.mkdir(self.configs.dataset.dataset_path)
+        elif os.path.exists(os.path.join(self.configs.dataset.dataset_path, "slovakspeech")):
+            self.logger.info(f"Dataset already exists at {self.configs.dataset.dataset_path}, skipping download.")
+            return
         
         archive_file = url.split("/")[-1]
         archive_path = os.path.join(self.configs.dataset.dataset_path, archive_file)
+
 
         self.logger.info(f"Downloading {url} to {archive_path}")
 
@@ -172,8 +181,7 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
             )
 
     def train_dataloader(self) -> AudioDataLoader:
-        sampler = SmartBatchingSampler if self.configs.trainer.sampler == "smart" else RandomSampler
-        train_sampler = sampler(data_source=self.dataset["train"], batch_size=self.configs.trainer.batch_size)
+        train_sampler = self.sampler(data_source=self.dataset["train"], batch_size=self.configs.trainer.batch_size)
         return AudioDataLoader(
             dataset=self.dataset["train"],
             num_workers=self.configs.trainer.num_workers,
@@ -181,8 +189,7 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
         )
 
     def val_dataloader(self) -> AudioDataLoader:
-        sampler = SmartBatchingSampler if self.configs.trainer.sampler == "smart" else RandomSampler
-        valid_sampler = sampler(self.dataset["valid"], batch_size=self.configs.trainer.batch_size)
+        valid_sampler = self.sampler(self.dataset["valid"], batch_size=self.configs.trainer.batch_size)
         return AudioDataLoader(
             dataset=self.dataset["valid"],
             num_workers=self.configs.trainer.num_workers,
@@ -190,8 +197,7 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
         )
 
     def test_dataloader(self) -> AudioDataLoader:
-        sampler = SmartBatchingSampler if self.configs.trainer.sampler == "smart" else RandomSampler
-        test_sampler = sampler(self.dataset["test"], batch_size=self.configs.trainer.batch_size)
+        test_sampler = self.sampler(self.dataset["test"], batch_size=self.configs.trainer.batch_size)
         return AudioDataLoader(
             dataset=self.dataset["test"],
             num_workers=self.configs.trainer.num_workers,
