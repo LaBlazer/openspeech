@@ -67,9 +67,9 @@ class BNReluRNN(nn.Module):
             num_layers=1,
             bias=True,
             batch_first=True,
-            dropout=dropout_p,
             bidirectional=bidirectional,
         )
+        self.dropout = nn.Dropout(p=dropout_p)
 
     def forward(self, inputs: Tensor, input_lengths: Tensor):
         total_length = inputs.size(0)
@@ -80,5 +80,7 @@ class BNReluRNN(nn.Module):
         outputs = nn.utils.rnn.pack_padded_sequence(inputs, input_lengths.cpu())
         outputs, hidden_states = self.rnn(outputs)
         outputs, _ = nn.utils.rnn.pad_packed_sequence(outputs, total_length=total_length)
+
+        outputs = self.dropout(outputs)
 
         return outputs
