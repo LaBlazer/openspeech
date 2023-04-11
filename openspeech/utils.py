@@ -235,6 +235,7 @@ def get_pl_trainer(
     trainer_config = {
         "accelerator": "cpu",
         "strategy": configs.trainer.strategy,
+        "replace_sampler_ddp": False if configs.trainer.strategy else True,
         "accumulate_grad_batches": configs.trainer.accumulate_grad_batches,
         "check_val_every_n_epoch": configs.trainer.check_val_every_n_epoch,
         "gradient_clip_val": configs.trainer.gradient_clip_val,
@@ -256,7 +257,7 @@ def get_pl_trainer(
         trainer_config.update({
             "accelerator": "gpu", 
             "devices": num_devices,
-            "auto_select_gpus": configs.trainer.auto_select_gpus,
+            "auto_select_gpus": configs.trainer.auto_select_gpus
         })
     elif configs.trainer.name == "tpu":
         trainer_config.update({
