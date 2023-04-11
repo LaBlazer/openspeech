@@ -61,33 +61,31 @@ class OpenspeechDataclass:
 
 
 @dataclass
-class LibriSpeechConfigs(OpenspeechDataclass):
-    """Configuration dataclass that common used"""
-
-    dataset: str = field(
-        default="librispeech", metadata={"help": "Select dataset for training (librispeech, ksponspeech, aishell, lm)"}
-    )
+class BaseDatasetConfigs(OpenspeechDataclass):
+    """Base config for datasets"""
     dataset_path: str = field(default=MISSING, metadata={"help": "Path of dataset"})
+    manifest_file_path: str = field(
+        default="data/manifest.txt", metadata={"help": "Path of manifest file"}
+    )
+
+@dataclass
+class LibriSpeechConfigs(BaseDatasetConfigs):
+    """Configuration dataclass that common used"""
+    dataset: str = field(
+        default="librispeech", metadata={"help": "Select dataset for training (librispeech, ksponspeech, aishell, lm, slovakspeech)"}
+    )
     dataset_download: bool = field(
         default=True, metadata={"help": "Flag indication whether to download dataset or not."}
-    )
-    manifest_file_path: str = field(
-        default="../../../LibriSpeech/libri_subword_manifest.txt", metadata={"help": "Path of manifest file"}
     )
 
 
 @dataclass
-class KsponSpeechConfigs(OpenspeechDataclass):
+class KsponSpeechConfigs(BaseDatasetConfigs):
     """Configuration dataclass that common used"""
-
     dataset: str = field(
-        default="ksponspeech", metadata={"help": "Select dataset for training (librispeech, ksponspeech, aishell, lm)"}
+        default="ksponspeech", metadata={"help": "Select dataset for training (librispeech, ksponspeech, aishell, lm, slovakspeech)"}
     )
-    dataset_path: str = field(default=MISSING, metadata={"help": "Path of dataset"})
     test_dataset_path: str = field(default=MISSING, metadata={"help": "Path of evaluation dataset"})
-    manifest_file_path: str = field(
-        default="../../../ksponspeech_manifest.txt", metadata={"help": "Path of manifest file"}
-    )
     test_manifest_dir: str = field(
         default="../../../KsponSpeech_scripts", metadata={"help": "Path of directory contains test manifest files"}
     )
@@ -98,41 +96,30 @@ class KsponSpeechConfigs(OpenspeechDataclass):
 
 
 @dataclass
-class AIShellConfigs(OpenspeechDataclass):
+class AIShellConfigs(BaseDatasetConfigs):
     """Configuration dataclass that common used"""
-
     dataset: str = field(
-        default="aishell", metadata={"help": "Select dataset for training (librispeech, ksponspeech, aishell, lm)"}
+        default="aishell", metadata={"help": "Select dataset for training (librispeech, ksponspeech, aishell, lm, slovakspeech)"}
     )
-    dataset_path: str = field(default=MISSING, metadata={"help": "Path of dataset"})
     dataset_download: bool = field(
         default=True, metadata={"help": "Flag indication whether to download dataset or not."}
     )
-    manifest_file_path: str = field(
-        default="../../../data_aishell/aishell_manifest.txt", metadata={"help": "Path of manifest file"}
-    )
 
 @dataclass
-class SlovakSpeechConfigs(OpenspeechDataclass):
+class SlovakSpeechConfigs(BaseDatasetConfigs):
     """Configuration dataclass that common used"""
-
     dataset: str = field(
-        default="slovakspeech", metadata={"help": "Select dataset for training (librispeech, ksponspeech, aishell, lm)"}
+        default="slovakspeech", metadata={"help": "Select dataset for training (librispeech, ksponspeech, aishell, lm, slovakspeech)"}
     )
-    dataset_path: str = field(default=MISSING, metadata={"help": "Path of dataset"})
     dataset_download: bool = field(
         default=True, metadata={"help": "Flag indication whether to download dataset or not."}
     )
-    manifest_file_path: str = field(
-        default="../../../data_slovakspeech/slovakspeech_manifest.txt", metadata={"help": "Path of manifest file"}
-    )
 
 @dataclass
-class LMConfigs(OpenspeechDataclass):
+class LMConfigs(BaseDatasetConfigs):
     dataset: str = field(
         default="lm", metadata={"help": "Select dataset for training (librispeech, ksponspeech, aishell, lm)"}
     )
-    dataset_path: str = field(default=MISSING, metadata={"help": "Path of dataset"})
     valid_ratio: float = field(default=0.05, metadata={"help": "Ratio of validation data"})
     test_ratio: float = field(default=0.05, metadata={"help": "Ratio of test data"})
 
@@ -175,20 +162,39 @@ class AugmentConfigs(OpenspeechDataclass):
 class BaseTrainerConfigs(OpenspeechDataclass):
     """Base trainer dataclass"""
 
-    seed: int = field(default=1, metadata={"help": "Seed for training."})
-    accelerator: str = field(
-        default="dp", metadata={"help": "Previously known as distributed_backend (dp, ddp, ddp2, etc…)."}
+    seed: int = field(
+        default=1, metadata={"help": "Seed for training."}
+    )
+    strategy: str = field(
+        default="auto", metadata={"help": "Which training strategy to use (dp, ddp, ddp2, etc…)."}
     )
     accumulate_grad_batches: int = field(
         default=1, metadata={"help": "Accumulates grads every k batches or as set up in the dict."}
     )
-    num_workers: int = field(default=4, metadata={"help": "The number of cpu cores"})
-    batch_size: int = field(default=32, metadata={"help": "Size of batch"})
-    check_val_every_n_epoch: int = field(default=1, metadata={"help": "Check val every n train epochs."})
-    gradient_clip_val: float = field(default=5.0, metadata={"help": "0 means don’t clip."})
-    logger: str = field(default="wandb", metadata={"help": "Training logger. {wandb, tensorboard}"})
-    max_epochs: int = field(default=20, metadata={"help": "Stop training once this number of epochs is reached."})
-    save_checkpoint_n_steps: int = field(default=10000, metadata={"help": "Save a checkpoint every N steps."})
+    num_workers: int = field(
+        default=4, metadata={"help": "The number of cpu cores"}
+    )
+    batch_size: int = field(
+        default=32, metadata={"help": "Size of batch"}
+    )
+    check_val_every_n_epoch: int = field(
+        default=1, metadata={"help": "Check val every n train epochs."}
+    )
+    gradient_clip_val: float = field(
+        default=5.0, metadata={"help": "0 means don’t clip."}
+    )
+    logger: str = field(
+        default="wandb", metadata={"help": "Training logger. {wandb, tensorboard}"}
+    )
+    max_epochs: int = field(
+        default=20, metadata={"help": "Stop training once this number of epochs is reached."}
+    )
+    max_steps: int = field(
+        default=-1, metadata={"help": "If > 0: set total number of training steps to perform."}
+    )
+    save_checkpoint_n_steps: int = field(
+        default=10000, metadata={"help": "Save a checkpoint every N steps."}
+    )
     auto_scale_batch_size: str = field(
         default="binsearch",
         metadata={
@@ -197,15 +203,19 @@ class BaseTrainerConfigs(OpenspeechDataclass):
         },
     )
     sampler: str = field(
-        default="else", metadata={"help": "smart: batching with similar sequence length." "else: random batch"}
+        default="else", metadata={"help": "smart: batching with similar sequence length." 
+                                          "else: random batch"}
     )
+    profiler: str = field(
+        default=MISSING, metadata={"help": "Profiler for training. (simple, advanced...)"}
+    )
+
 
 
 @dataclass
 class CPUResumeTrainerConfigs(BaseTrainerConfigs):
     name: str = field(default="cpu-resume", metadata={"help": "Trainer name"})
     checkpoint_path: str = field(default=MISSING, metadata={"help": "Path of model checkpoint."})
-    device: str = field(default="cpu", metadata={"help": "Training device."})
     use_cuda: bool = field(default=False, metadata={"help": "If set True, will train with GPU"})
 
 
@@ -213,7 +223,6 @@ class CPUResumeTrainerConfigs(BaseTrainerConfigs):
 class GPUResumeTrainerConfigs(BaseTrainerConfigs):
     name: str = field(default="gpu-resume", metadata={"help": "Trainer name"})
     checkpoint_path: str = field(default=MISSING, metadata={"help": "Path of model checkpoint."})
-    device: str = field(default="gpu", metadata={"help": "Training device."})
     use_cuda: bool = field(default=True, metadata={"help": "If set True, will train with GPU"})
     auto_select_gpus: bool = field(
         default=True, metadata={"help": "If enabled and gpus is an integer, pick available gpus automatically."}
@@ -224,7 +233,6 @@ class GPUResumeTrainerConfigs(BaseTrainerConfigs):
 class TPUResumeTrainerConfigs(BaseTrainerConfigs):
     name: str = field(default="tpu-resume", metadata={"help": "Trainer name"})
     checkpoint_path: str = field(default=MISSING, metadata={"help": "Path of model checkpoint."})
-    device: str = field(default="tpu", metadata={"help": "Training device."})
     use_cuda: bool = field(default=False, metadata={"help": "If set True, will train with GPU"})
     use_tpu: bool = field(default=True, metadata={"help": "If set True, will train with GPU"})
     tpu_cores: int = field(default=8, metadata={"help": "Number of TPU cores"})
@@ -233,16 +241,13 @@ class TPUResumeTrainerConfigs(BaseTrainerConfigs):
 @dataclass
 class CPUTrainerConfigs(BaseTrainerConfigs):
     name: str = field(default="cpu", metadata={"help": "Trainer name"})
-    device: str = field(default="cpu", metadata={"help": "Training device."})
     use_cuda: bool = field(default=False, metadata={"help": "If set True, will train with GPU"})
 
 
 @dataclass
 class GPUTrainerConfigs(BaseTrainerConfigs):
     """GPU trainer dataclass"""
-
     name: str = field(default="gpu", metadata={"help": "Trainer name"})
-    device: str = field(default="gpu", metadata={"help": "Training device."})
     use_cuda: bool = field(default=True, metadata={"help": "If set True, will train with GPU"})
     auto_select_gpus: bool = field(
         default=True, metadata={"help": "If enabled and gpus is an integer, pick available gpus automatically."}
@@ -252,7 +257,6 @@ class GPUTrainerConfigs(BaseTrainerConfigs):
 @dataclass
 class TPUTrainerConfigs(BaseTrainerConfigs):
     name: str = field(default="tpu", metadata={"help": "Trainer name"})
-    device: str = field(default="tpu", metadata={"help": "Training device."})
     use_cuda: bool = field(default=False, metadata={"help": "If set True, will train with GPU"})
     use_tpu: bool = field(default=True, metadata={"help": "If set True, will train with GPU"})
     tpu_cores: int = field(default=8, metadata={"help": "Number of TPU cores"})

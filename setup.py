@@ -39,7 +39,7 @@ setup(
         "sentencepiece",
         "librosa==0.9.2",
         "torchmetrics==0.6.0",
-        "pytorch-lightning==1.4.0",
+        "pytorch-lightning==1.8.0",
         "hydra-core",
         "wget",
         "wandb",
