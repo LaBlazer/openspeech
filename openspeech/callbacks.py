@@ -50,15 +50,17 @@ class CheckpointEveryNSteps(pl.Callback):
 
     def on_train_batch_end(self, trainer: pl.Trainer, pl_module, outputs, batch, batch_idx):
         """Check if we should save a checkpoint after every train batch"""
-        epoch = trainer.current_epoch
         global_step = trainer.global_step
         if global_step % self.save_step_frequency == 0:
+            epoch = trainer.current_epoch
             if self.use_modelcheckpoint_filename:
                 filename = trainer.checkpoint_callback.filename
             else:
                 filename = f"{epoch}_{global_step}.ckpt"
             ckpt_path = os.path.join(trainer.checkpoint_callback.dirpath, filename)
             trainer.save_checkpoint(ckpt_path)
-        
+    
+    def on_train_epoch_end(self, trainer: pl.Trainer, pl_module):
         self._shuffle_dataloader(trainer.train_dataloader)
-        self._shuffle_dataloader(trainer.val_dataloader)
+        for dl in trainer.val_dataloaders:
+            self._shuffle_dataloader(dl)
