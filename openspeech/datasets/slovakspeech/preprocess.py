@@ -61,7 +61,7 @@ def read_transcripts(dataset_path: str):
     transcripts_dict = dict()
 
     for dataset in ["tedx_sk", "vox_sk", "cv12_sk"]:
-        with open(os.path.join(dataset_path, dataset, "transcripts.tsv")) as f:
+        with open(os.path.join(dataset_path, "slovakspeech", dataset, "transcripts.tsv")) as f:
             # skip header
             f.readline()
             for line in f.readlines():
@@ -72,7 +72,7 @@ def read_transcripts(dataset_path: str):
                 if len(transcript) < 4 or len(transcript) > 300:
                     continue
 
-                audio_path = os.path.join(dataset, "clips", audio_path)
+                audio_path = os.path.join("slovakspeech", dataset, "clips", audio_path)
                 transcripts_dict[audio_path] = transcript
 
     return transcripts_dict

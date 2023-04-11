@@ -51,9 +51,10 @@ class ErrorRate(object):
             - **cer**: character error rate
         """
         dist, length = self._get_distance(targets, y_hats)
-        self.total_dist += dist
-        self.total_length += length
-        return self.total_dist / self.total_length
+        #self.total_dist += dist
+        #self.total_length += length
+        #return self.total_dist / self.total_length
+        return dist / length
 
     def _get_distance(self, targets: torch.Tensor, y_hats: torch.Tensor) -> Tuple[float, int]:
         r"""

@@ -47,7 +47,7 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
         configs (DictConfig): configuration set.
     """
     SLOVAKSPEECH_TRAIN_SPLIT = 0.7
-    SLOVAKSPEECH_VALID_SPLIT = 0.2
+    SLOVAKSPEECH_VALID_SPLIT = 0.25
 
     assert SLOVAKSPEECH_TRAIN_SPLIT + SLOVAKSPEECH_VALID_SPLIT <= 1.0
 
@@ -77,7 +77,6 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
         tar.extractall(self.configs.dataset.dataset_path)
         tar.close()
         os.remove(archive_path)
-        self.configs.dataset.dataset_path = os.path.join(self.configs.dataset.dataset_path, "slovakspeech")
 
     def _generate_manifest_files(self, manifest_file_path: str) -> None:
         r"""Generate manifest files."""
