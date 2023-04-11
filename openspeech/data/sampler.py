@@ -99,7 +99,7 @@ class SmartBatchingSampler(Sampler):
     def __len__(self):
         return len(self.bins)
 
-    def shuffle(self, epoch):
+    def shuffle(self):
         self.random.shuffle(self.bins)
 
 
@@ -130,11 +130,10 @@ class SmartBatchingDistributedSampler(DistributedSampler):
 
     def __iter__(self):
         for ids in self.bins:
-            self.random.shuffle(ids)
             yield ids[self.rank:self.batch_size:self.num_replicas]
 
     def __len__(self) -> int:
         return len(self.bins)
 
-    def shuffle(self, epoch):
+    def shuffle(self):
         self.random.shuffle(self.bins)
