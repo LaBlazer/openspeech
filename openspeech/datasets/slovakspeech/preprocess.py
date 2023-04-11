@@ -27,6 +27,8 @@ import tarfile
 
 import pandas as pd
 
+from openspeech.data.audio.load import get_audio_length
+
 SLOVAK_CHARACTERS = "aáäbcčdďeéfghiíjklĺľmnňoóôpqrŕsštťuúvwxyýzž"
 ADDITIONAL_CHARACTERS = " " #" ,.?!"
 
@@ -52,13 +54,15 @@ def _sanitize_text(text):
     text = WHITESPACE_REGEX.sub(" ", text)
     return text.strip()
 
-def read_transcripts(dataset_path: str):
+def read_transcripts(dataset_path: str, text_min_len: int = 4, text_max_len: int = 200, 
+                     audio_min_len: float = 0.0, audio_max_len: float = 20.0):
     """
     Returns:
         transcripts (dict): All the transcripts from datasets. They are represented
-                            by {audio id: transcript}.
+                            by {audio path: transcript}.
     """
     transcripts_dict = dict()
+    skipped = 0
 
     for dataset in ["tedx_sk", "vox_sk", "cv12_sk"]:
         with open(os.path.join(dataset_path, "slovakspeech", dataset, "transcripts.tsv")) as f:
@@ -69,13 +73,21 @@ def read_transcripts(dataset_path: str):
 
                 transcript = _sanitize_text(transcript)
 
-                if len(transcript) < 4 or len(transcript) > 300:
+                if len(transcript) < text_min_len or len(transcript) > text_max_len:
+                    skipped += 1
                     continue
 
                 audio_path = os.path.join("slovakspeech", dataset, "clips", audio_path)
+
+                audio_length = get_audio_length(os.path.join(dataset_path, audio_path), sample_rate=16000)
+
+                if audio_length < audio_min_len or audio_length > audio_max_len:
+                    skipped += 1
+                    continue
+
                 transcripts_dict[audio_path] = transcript
 
-    return transcripts_dict
+    return transcripts_dict, skipped
 
 
 def _sentence_to_target(sentence, char2id):
@@ -90,7 +102,7 @@ def _sentence_to_target(sentence, char2id):
     return target[:-1]
 
 
-def generate_character_labels(transcripts: dict, vocab_path: str):
+def generate_vocab_file(transcripts: dict, vocab_path: str):
     label_freq_dict = {}
 
     for ch in SLOVAK_CHARACTERS + ADDITIONAL_CHARACTERS:
@@ -114,7 +126,7 @@ def generate_character_labels(transcripts: dict, vocab_path: str):
     label_df.to_csv(vocab_path, encoding="utf-8", index=False)
 
 
-def generate_character_script(transcripts: dict, manifest_file_path: str, vocab_path: str):
+def generate_manifest_file(transcripts: dict, manifest_file_path: str, vocab_path: str):
     char2id, id2char = _load_label(vocab_path)
 
     with open(manifest_file_path, "w") as f:

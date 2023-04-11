@@ -18,7 +18,7 @@ def _chunk_read(response, file_path, chunk_size=1024 * 128):
             f.write(chunk)
 
             percent = mbytes_so_far / total_size_mbytes * 100.0
-            sys.stdout.write("Downloaded %d of %d MB (%0.2f%%, %0.2f MBps)\r" % 
+            sys.stdout.write("=> Downloaded %d / %d MB [%0.2f%%, %0.2f MBps]\r" % 
                 (mbytes_so_far, total_size_mbytes, percent, mbytes_so_far/(time.time() - start)))
 
             if mbytes_so_far >= total_size_mbytes:

@@ -23,6 +23,7 @@
 import os
 from typing import Optional
 import logging
+import random
 
 import numpy as np
 from torch.utils.data import Sampler
@@ -79,29 +80,27 @@ class SmartBatchingSampler(Sampler):
 
         logging.info("Loading audio lengths...")
 
-        audio_lengths = [self._get_audio_length(audio_path) for audio_path in data_source.audio_paths]
-        audio_indices = [idx for idx in range(len(data_source.audio_paths))]
+        self.random = random.Random(42)
 
-        pack_by_length = list(zip(audio_lengths, audio_indices))
-        sort_by_length = sorted(pack_by_length)
-        audio_lengths, audio_indices = zip(*sort_by_length)
+        audio_lengths = {idx: self._get_audio_length(audio_path) for idx, audio_path in enumerate(data_source.audio_paths)}
+        audio_indices = [x[0] for x in sorted(audio_lengths.items(), key=lambda x: x[1])]
 
         self.bins = [audio_indices[i : i + batch_size] for i in range(0, len(audio_indices), batch_size)]
         self.drop_last = drop_last
 
     def __iter__(self):
         for ids in self.bins:
-            np.random.shuffle(list(ids))
+            self.random.shuffle(ids)
             yield ids
 
     def _get_audio_length(self, audio_path):
-        return len(get_audio_length(os.path.join(self.data_source.dataset_path, audio_path), sample_rate=16000))
+        return get_audio_length(os.path.join(self.data_source.dataset_path, audio_path), sample_rate=16000)
 
     def __len__(self):
         return len(self.bins)
 
     def shuffle(self, epoch):
-        np.random.shuffle(self.bins)
+        self.random.shuffle(self.bins)
 
 
 class SmartBatchingDistributedSampler(DistributedSampler):
@@ -116,33 +115,26 @@ class SmartBatchingDistributedSampler(DistributedSampler):
         self.batch_size = batch_size
         self.data_source = data_source
 
-        np.random.seed(seed)
+        self.random = random.Random(seed)
 
         logging.info("Loading audio lengths...")
 
-        audio_lengths = [self._get_audio_length(audio_path) for audio_path in data_source.audio_paths]
-        audio_indices = [idx for idx in range(len(data_source.audio_paths))]
-
-        pack_by_length = list(zip(audio_lengths, audio_indices))
-        sort_by_length = sorted(pack_by_length)
-        audio_lengths, audio_indices = zip(*sort_by_length)
+        audio_lengths = {idx: self._get_audio_length(audio_path) for idx, audio_path in enumerate(data_source.audio_paths)}
+        audio_indices = [x[0] for x in sorted(audio_lengths.items(), key=lambda x: x[1])]
 
         self.bins = [audio_indices[i : i + batch_size] for i in range(0, len(audio_indices), batch_size)]
         self.drop_last = drop_last
 
     def _get_audio_length(self, audio_path):
-        return len(get_audio_length(os.path.join(self.data_source.dataset_path, audio_path), sample_rate=16000))
+        return get_audio_length(os.path.join(self.data_source.dataset_path, audio_path), sample_rate=16000)
 
     def __iter__(self):
         for ids in self.bins:
-            print(ids)
-            np.random.shuffle(list(ids))
-            print(ids)
+            self.random.shuffle(ids)
             yield ids[self.rank:self.batch_size:self.num_replicas]
 
     def __len__(self) -> int:
         return len(self.bins)
 
     def shuffle(self, epoch):
-        np.random.shuffle(self.bins)
-
+        self.random.shuffle(self.bins)

@@ -114,6 +114,18 @@ class SlovakSpeechConfigs(BaseDatasetConfigs):
     dataset_download: bool = field(
         default=True, metadata={"help": "Flag indication whether to download dataset or not."}
     )
+    text_min_length: int = field(
+        default=3, metadata={"help": "Minimum length of text in characters"}
+    )
+    text_max_length: int = field(
+        default=200, metadata={"help": "Maximum length of text in characters"}
+    )
+    audio_min_length: float = field(
+        default=0, metadata={"help": "Minimum length of audio in seconds"}
+    )
+    audio_max_length: float = field(
+        default=15, metadata={"help": "Maximum length of audio in seconds"}
+    )
 
 @dataclass
 class LMConfigs(BaseDatasetConfigs):

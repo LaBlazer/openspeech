@@ -57,11 +57,11 @@ def load_audio(audio_path: str, sample_rate: int, del_silence: bool = False) -> 
         logger.warning("IOError in {0}".format(audio_path))
         return None
 
-def get_audio_length(audio_path: str, sample_rate: int) -> int:
+def get_audio_length(audio_path: str, sample_rate: int) -> float:
     """
-    Get audio length in miliseconds.
+    Get audio length in seconds.
     """
     if audio_path.endswith("pcm"):
-        return int(len(np.memmap(audio_path, dtype="h", mode="r")) / sample_rate * 1000)
+        return len(np.memmap(audio_path, dtype="h", mode="r")) / sample_rate
     elif audio_path.endswith("wav") or audio_path.endswith("flac"):
-        return int(librosa.get_duration(filename=audio_path) * 1000)
+        return librosa.get_duration(filename=audio_path)

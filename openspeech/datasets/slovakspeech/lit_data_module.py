@@ -34,7 +34,7 @@ from openspeech.data.audio.data_loader import AudioDataLoader
 from openspeech.data.audio.dataset import SpeechToTextDataset
 from openspeech.data.sampler import RandomSampler, SmartBatchingSampler
 from openspeech.datasets import register_data_module
-from openspeech.datasets.slovakspeech.preprocess import read_transcripts, generate_character_labels, generate_character_script
+from openspeech.datasets.slovakspeech.preprocess import read_transcripts, generate_manifest_file, generate_vocab_file
 from openspeech.datasets.slovakspeech.downloader import download
 
 
@@ -81,14 +81,17 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
     def _generate_manifest_files(self, manifest_file_path: str) -> None:
         r"""Generate manifest files."""
         self.logger.info(f"Generating manifest files to {manifest_file_path}")
-        transcripts = read_transcripts(
+        transcripts, skipped = read_transcripts(
             dataset_path=self.configs.dataset.dataset_path
         )
-        generate_character_labels(
+
+        self.logger.info(f"Skipping {skipped} transcripts due to length constraints.")
+
+        generate_vocab_file(
             transcripts=transcripts,
             vocab_path=self.configs.tokenizer.vocab_path,
         )
-        generate_character_script(
+        generate_manifest_file(
             transcripts=transcripts,
             manifest_file_path=manifest_file_path,
             vocab_path=self.configs.tokenizer.vocab_path,
@@ -120,7 +123,7 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
             self._download_dataset()
 
         if not os.path.exists(self.configs.dataset.manifest_file_path):
-            self.logger.info("Manifest file is not exists !!\n" "Generate manifest files..")
+            self.logger.info("Manifest file does not exist !!\n" "Generating manifest files..")
             if not os.path.exists(self.configs.dataset.dataset_path):
                 raise ValueError("Dataset path is not valid.")
             self._generate_manifest_files(self.configs.dataset.manifest_file_path)

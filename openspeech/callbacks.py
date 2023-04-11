@@ -41,6 +41,13 @@ class CheckpointEveryNSteps(pl.Callback):
         self.save_step_frequency = save_step_frequency
         self.use_modelcheckpoint_filename = use_modelcheckpoint_filename
 
+    def _shuffle_dataloader(self, dataloader):
+        """Shuffle the dataset"""
+        if hasattr(dataloader, "batch_sampler") and \
+            hasattr(dataloader.batch_sampler, 'shuffle') and \
+            callable(dataloader.batch_sampler.shuffle):
+            dataloader.batch_sampler.shuffle()
+
     def on_train_batch_end(self, trainer: pl.Trainer, pl_module, outputs, batch, batch_idx):
         """Check if we should save a checkpoint after every train batch"""
         epoch = trainer.current_epoch
@@ -52,3 +59,6 @@ class CheckpointEveryNSteps(pl.Callback):
                 filename = f"{epoch}_{global_step}.ckpt"
             ckpt_path = os.path.join(trainer.checkpoint_callback.dirpath, filename)
             trainer.save_checkpoint(ckpt_path)
+        
+        self._shuffle_dataloader(trainer.train_dataloader)
+        self._shuffle_dataloader(trainer.val_dataloader)
