@@ -165,8 +165,8 @@ class BaseTrainerConfigs(OpenspeechDataclass):
     seed: int = field(
         default=1, metadata={"help": "Seed for training."}
     )
-    strategy: str = field(
-        default="auto", metadata={"help": "Which training strategy to use (dp, ddp, ddp2, etc…)."}
+    strategy: Optional[str] = field(
+        default=None, metadata={"help": "Which training strategy to use (ddp, ddp2, etc…)."}
     )
     accumulate_grad_batches: int = field(
         default=1, metadata={"help": "Accumulates grads every k batches or as set up in the dict."}

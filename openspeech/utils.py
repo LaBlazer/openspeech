@@ -255,7 +255,7 @@ def get_pl_trainer(
     elif configs.trainer.name == "gpu":
         trainer_config.update({
             "accelerator": "gpu", 
-            "gpus": num_devices,
+            "devices": num_devices,
             "auto_select_gpus": configs.trainer.auto_select_gpus,
         })
     elif configs.trainer.name == "tpu":
@@ -267,7 +267,7 @@ def get_pl_trainer(
     elif configs.trainer.name == "gpu-fp16":
         trainer_config.update({
             "accelerator": "gpu", 
-            "gpus": num_devices,
+            "devices": num_devices,
             "auto_select_gpus": configs.trainer.auto_select_gpus,
             "precision": configs.trainer.precision,
             "amp_backend": amp_backend,
@@ -292,7 +292,7 @@ def get_pl_trainer(
     elif configs.trainer.name == "gpu-resume":
         trainer_config.update({
             "accelerator": "gpu", 
-            "gpus": num_devices,
+            "devices": num_devices,
             "auto_select_gpus": configs.trainer.auto_select_gpus,
             "resume_from_checkpoint": configs.trainer.checkpoint_path,
         })
