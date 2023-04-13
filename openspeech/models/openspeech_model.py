@@ -80,7 +80,8 @@ class OpenspeechModel(pl.LightningModule):
         Args:
             dictionary (dict): dictionary contains information.
         """
-        self.log(dictionary, prog_bar=True, sync_dist=True)
+        for key, value in dictionary.items():
+            self.log(key, value, prog_bar=True, sync_dist=True)
     
     def define_metric(self, metric_name: str, summary="best", goal="minimize") -> None:
         r"""
