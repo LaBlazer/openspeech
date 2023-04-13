@@ -29,11 +29,12 @@ class Tokenizer(object):
         Do not use this class directly, use one of the sub classes.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, subword_token=None, *args, **kwargs):
         self.sos_id = None
         self.eos_id = None
         self.pad_id = None
         self.blank_id = None
+        self.subword_token = None
 
     def decode(self, labels):
         raise NotImplementedError

@@ -22,8 +22,7 @@
 
 pip install -e .
 
-conda install -c pytorch torchaudio
-conda install -c conda-forge librosa
+conda install pytorch==1.12.1 torchaudio==0.12.1 cudatoolkit=11.6 -c pytorch -c conda-forge
 
 # Install warp-rnnt
 # Refer to : https://github.com/1ytic/warp-rnnt
@@ -34,5 +33,6 @@ cd ../..
 
 # Install ctcdecode
 # Refer to : https://github.com/parlance/ctcdecode
+# sudo apt install g++ 
 git clone --recursive https://github.com/parlance/ctcdecode.git
 cd ctcdecode && pip install .

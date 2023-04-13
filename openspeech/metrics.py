@@ -20,11 +20,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from typing import Tuple
+from typing import List, Tuple, Union
 
-import Levenshtein as Lev
+from jiwer import wer, cer
 import torch
 
+from openspeech.tokenizers.tokenizer import Tokenizer
 
 class ErrorRate(object):
     r"""
@@ -34,9 +35,7 @@ class ErrorRate(object):
         Do not use this class directly, use one of the sub classes.
     """
 
-    def __init__(self, tokenizer) -> None:
-        self.total_dist = 0.0
-        self.total_length = 0.0
+    def __init__(self, tokenizer: Tokenizer) -> None:
         self.tokenizer = tokenizer
 
     def __call__(self, targets, y_hats):
@@ -48,39 +47,18 @@ class ErrorRate(object):
             y_hats (torch.Tensor): predicted y values (y_hat) by the model
 
         Returns:
-            - **cer**: character error rate
+            - **metric**: error rate metric
         """
-        dist, length = self._get_distance(targets, y_hats)
-        #self.total_dist += dist
-        #self.total_length += length
-        #return self.total_dist / self.total_length
-        return dist / length
+        # if we are using subword tokenization, we need to remove the
+        # subword token markers
+        if self.tokenizer.subword_token:
+            targets = [t.replace(self.tokenizer.subword_token, '') for t in targets]
+            y_hats = [y.replace(self.tokenizer.subword_token, '') for y in y_hats]
 
-    def _get_distance(self, targets: torch.Tensor, y_hats: torch.Tensor) -> Tuple[float, int]:
-        r"""
-        Provides total character distance between targets & y_hats
+        targets_decoded = [self.tokenizer.decode(t) for t in targets]
+        y_hats_decoded = [self.tokenizer.decode(y) for y in y_hats]
 
-        Args: targets, y_hats
-            targets (torch.Tensor): set of ground truth
-            y_hats (torch.Tensor): predicted y values (y_hat) by the model
-
-        Returns: total_dist, total_length
-            - **total_dist**: total distance between targets & y_hats
-            - **total_length**: total length of targets sequence
-        """
-        total_dist = 0
-        total_length = 0
-
-        for (target, y_hat) in zip(targets, y_hats):
-            s1 = self.tokenizer.decode(target)
-            s2 = self.tokenizer.decode(y_hat)
-
-            dist, length = self.metric(s1, s2)
-
-            total_dist += dist
-            total_length += length
-
-        return total_dist, total_length
+        return self.metric(targets_decoded, y_hats_decoded) 
 
     def metric(self, *args, **kwargs) -> Tuple[float, int]:
         raise NotImplementedError
@@ -92,36 +70,22 @@ class CharacterErrorRate(ErrorRate):
     two provided sentences after tokenizing to characters.
     """
 
-    def __init__(self, tokenizer):
+    def __init__(self, tokenizer: Tokenizer):
         super(CharacterErrorRate, self).__init__(tokenizer)
 
-    def metric(self, s1: str, s2: str) -> Tuple[float, int]:
+    def metric(self, s1: Union[str, List[str]], s2: Union[str, List[str]]) -> float:
         r"""
         Computes the Character Error Rate, defined as the edit distance between the
         two provided sentences after tokenizing to characters.
 
         Args: s1, s2
-            s1 (string): space-separated sentence
-            s2 (string): space-separated sentence
+            s1 (string): space-separated target sentences
+            s2 (string): space-separated predicted sentences
 
-        Returns: dist, length
-            - **dist**: distance between target & y_hat
-            - **length**: length of target sequence
+        Returns: metric
+            - **metric**: cer between target & y_hat
         """
-        s1 = s1.replace(" ", "")
-        s2 = s2.replace(" ", "")
-
-        # if '_' in sentence, means subword-unit, delete '_'
-        if "_" in s1:
-            s1 = s1.replace("_", "")
-
-        if "_" in s2:
-            s2 = s2.replace("_", "")
-
-        dist = Lev.distance(s2, s1)
-        length = len(s1.replace(" ", ""))
-
-        return dist, length
+        return cer(s1, s2)
 
 
 class WordErrorRate(ErrorRate):
@@ -130,31 +94,19 @@ class WordErrorRate(ErrorRate):
     two provided sentences after tokenizing to words.
     """
 
-    def __init__(self, tokenizer):
+    def __init__(self, tokenizer: Tokenizer):
         super(WordErrorRate, self).__init__(tokenizer)
 
-    def metric(self, s1: str, s2: str) -> Tuple[float, int]:
+    def metric(self, s1: Union[str, List[str]], s2: Union[str, List[str]]) -> float:
         r"""
         Computes the Word Error Rate, defined as the edit distance between the
         two provided sentences after tokenizing to words.
 
         Args: s1, s2
-            s1 (string): space-separated sentence
-            s2 (string): space-separated sentence
+            s1 (string): space-separated target sentences
+            s2 (string): space-separated predicted sentences
 
-        Returns: dist, length
-            - **dist**: distance between target & y_hat
-            - **length**: length of target sequence
+        Returns: metric
+            - **metric**: wer between target & y_hat
         """
-        b = set(s1.split() + s2.split())
-        word2char = dict(zip(b, range(len(b))))
-
-        # map the words to a char array (Levenshtein packages only accepts
-        # strings)
-        w1 = [chr(word2char[w]) for w in s1.split()]
-        w2 = [chr(word2char[w]) for w in s2.split()]
-
-        dist = Lev.distance("".join(w1), "".join(w2))
-        length = len(s1.split())
-
-        return dist, length
+        return wer(s1, s2)

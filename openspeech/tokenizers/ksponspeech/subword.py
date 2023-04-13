@@ -49,7 +49,7 @@ class KsponSpeechSubwordTokenizer(Tokenizer):
     """
 
     def __init__(self, configs: DictConfig):
-        super(KsponSpeechSubwordTokenizer, self).__init__()
+        super(KsponSpeechSubwordTokenizer, self).__init__(subword_token="_")
         self.sp = spm.SentencePieceProcessor()
         self.sp.Load(configs.tokenizer.sp_model_path)
 

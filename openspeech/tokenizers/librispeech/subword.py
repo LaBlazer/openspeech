@@ -51,7 +51,7 @@ class LibriSpeechSubwordTokenizer(Tokenizer):
     """
 
     def __init__(self, configs: DictConfig):
-        super(LibriSpeechSubwordTokenizer, self).__init__()
+        super(LibriSpeechSubwordTokenizer, self).__init__(subword_token="_")
         try:
             import sentencepiece as spm
         except ImportError:
