@@ -224,6 +224,9 @@ class BaseTrainerConfigs(OpenspeechDataclass):
     profiler: Optional[str] = field(
         default=None, metadata={"help": "Profiler for training. (simple, advanced...)"}
     )
+    devices: Optional[List[int]] = field(
+        default=None, metadata={"help": "Which devices to train model. (0, 1, 2, 3...)"}
+    )
 
 
 

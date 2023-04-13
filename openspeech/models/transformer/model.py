@@ -114,7 +114,7 @@ class JointCTCTransformerModel(OpenspeechEncoderDecoderModel):
 
         self.encoder = ConvolutionalTransformerEncoder(
             input_dim=self.configs.audio.num_mels,
-            extractor=self.configs.extractor,
+            extractor=self.configs.model.extractor,
             d_model=self.configs.model.d_model,
             d_ff=self.configs.model.d_ff,
             num_layers=self.configs.model.num_encoder_layers,
@@ -268,7 +268,7 @@ class VGGTransformerModel(OpenspeechEncoderDecoderModel):
 
         self.encoder = ConvolutionalTransformerEncoder(
             input_dim=self.configs.audio.num_mels,
-            extractor=self.configs.extractor,
+            extractor=self.configs.model.extractor,
             d_model=self.configs.model.d_model,
             d_ff=self.configs.model.d_ff,
             num_layers=self.configs.model.num_encoder_layers,

@@ -253,25 +253,29 @@ def get_pl_trainer(
         ],
     }
 
+    devices = configs.trainer.devices if configs.trainer.devices else [i for i in range(num_devices)]
+
+    logger.info(f"Using devices: {devices}")
+
     if configs.trainer.name == "cpu":
         # use default configuration
         pass
     elif configs.trainer.name == "gpu":
         trainer_config.update({
             "accelerator": "gpu", 
-            "devices": num_devices,
+            "devices": devices,
             "auto_select_gpus": configs.trainer.auto_select_gpus
         })
     elif configs.trainer.name == "tpu":
         trainer_config.update({
             "accelerator": "tpu", 
-            "tpu_cores": num_devices,
+            "tpu_cores": devices,
             "auto_select_gpus": configs.trainer.auto_select_gpus,
         })
     elif configs.trainer.name == "gpu-fp16":
         trainer_config.update({
             "accelerator": "gpu", 
-            "devices": num_devices,
+            "devices": devices,
             "auto_select_gpus": configs.trainer.auto_select_gpus,
             "precision": configs.trainer.precision,
             "amp_backend": amp_backend,
@@ -279,7 +283,7 @@ def get_pl_trainer(
     elif configs.trainer.name == "tpu-fp16":
         trainer_config.update({
             "accelerator": "tpu", 
-            "tpu_cores": num_devices,
+            "tpu_cores": devices,
             "auto_select_gpus": configs.trainer.auto_select_gpus,
             "precision": configs.trainer.precision,
             "amp_backend": amp_backend,
@@ -296,14 +300,14 @@ def get_pl_trainer(
     elif configs.trainer.name == "gpu-resume":
         trainer_config.update({
             "accelerator": "gpu", 
-            "devices": num_devices,
+            "devices": devices,
             "auto_select_gpus": configs.trainer.auto_select_gpus,
             "resume_from_checkpoint": configs.trainer.checkpoint_path,
         })
     elif configs.trainer.name == "tpu-resume":
         trainer_config.update({
             "accelerator": "tpu", 
-            "tpu_cores": num_devices,
+            "tpu_cores": devices,
             "auto_select_gpus": configs.trainer.auto_select_gpus,
             "resume_from_checkpoint": configs.trainer.checkpoint_path,
         })
