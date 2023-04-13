@@ -25,6 +25,7 @@ from typing import Dict
 import pytorch_lightning as pl
 import torch
 import torch.nn as nn
+import wandb
 from omegaconf import DictConfig
 from torch import Tensor
 from torch.optim import ASGD, SGD, Adadelta, Adagrad, Adam, Adamax, AdamW
@@ -78,8 +79,7 @@ class OpenspeechModel(pl.LightningModule):
         Args:
             dictionary (dict): dictionary contains information.
         """
-        for key, value in dictionary.items():
-            self.log(key, value, prog_bar=True, sync_dist=True)
+        self.log(dictionary, prog_bar=True, sync_dist=True)
 
     def forward(self, inputs: torch.FloatTensor, input_lengths: torch.LongTensor) -> Dict[str, Tensor]:
         r"""

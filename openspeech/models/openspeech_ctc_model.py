@@ -24,6 +24,7 @@ from collections import OrderedDict
 from typing import Dict
 
 import torch
+import wandb
 from omegaconf import DictConfig
 
 from openspeech.models import OpenspeechModel
@@ -50,6 +51,11 @@ class OpenspeechCTCModel(OpenspeechModel):
         super(OpenspeechCTCModel, self).__init__(configs, tokenizer)
         self.encoder = None
         self.decoder = None
+
+        for stage in ['val', 'test']:
+            wandb.define_metric(f"{stage}_wer", summary="best", goal="minimize")
+            wandb.define_metric(f"{stage}_cer", summary="best", goal="minimize")
+            wandb.define_metric(f"{stage}_loss", summary="best", goal="minimize")
 
     def set_beam_decoder(self, beam_size: int = 3):
         """Setting beam search decoder"""
