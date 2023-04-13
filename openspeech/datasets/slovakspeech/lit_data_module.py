@@ -187,6 +187,7 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
             dataset=self.dataset["train"],
             num_workers=self.configs.trainer.num_workers,
             batch_sampler=train_sampler,
+            persistent_workers=True,
         )
 
     def val_dataloader(self) -> AudioDataLoader:
@@ -195,6 +196,7 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
             dataset=self.dataset["valid"],
             num_workers=self.configs.trainer.num_workers,
             batch_sampler=valid_sampler,
+            persistent_workers=True,
         )
 
     def test_dataloader(self) -> AudioDataLoader:
@@ -203,4 +205,5 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
             dataset=self.dataset["test"],
             num_workers=self.configs.trainer.num_workers,
             batch_sampler=test_sampler,
+            persistent_workers=True,
         )
