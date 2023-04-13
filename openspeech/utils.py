@@ -255,8 +255,6 @@ def get_pl_trainer(
 
     devices = configs.trainer.devices if configs.trainer.devices else [i for i in range(num_devices)]
 
-    logger.log(f"Using devices: {devices}")
-
     if configs.trainer.name == "cpu":
         # use default configuration
         pass
