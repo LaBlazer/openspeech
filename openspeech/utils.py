@@ -235,7 +235,7 @@ def get_pl_trainer(
     trainer_config = {
         "accelerator": "cpu",
         "strategy": configs.trainer.strategy,
-        "replace_sampler_ddp": False if configs.trainer.strategy else True,
+        "replace_sampler_ddp": configs.trainer.replace_sampler_ddp,
         "accumulate_grad_batches": configs.trainer.accumulate_grad_batches,
         "check_val_every_n_epoch": configs.trainer.check_val_every_n_epoch,
         "gradient_clip_val": configs.trainer.gradient_clip_val,

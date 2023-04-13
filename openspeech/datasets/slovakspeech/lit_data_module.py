@@ -59,6 +59,7 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
 
         if self.configs.trainer.strategy is not None:
             self.sampler = SmartBatchingDistributedSampler
+            self.configs.trainer.replace_sampler_ddp = False
         else:
             self.sampler = SmartBatchingSampler if self.configs.trainer.sampler == "smart" else RandomSampler
 

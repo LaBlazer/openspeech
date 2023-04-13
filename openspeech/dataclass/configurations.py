@@ -180,6 +180,9 @@ class BaseTrainerConfigs(OpenspeechDataclass):
     strategy: Optional[str] = field(
         default=None, metadata={"help": "Which training strategy to use (ddp, ddp2, etc…)."}
     )
+    replace_sampler_ddp: bool = field(
+        default=False, metadata={"help": "Replace the sampler for DDP training."}
+    )
     accumulate_grad_batches: int = field(
         default=1, metadata={"help": "Accumulates grads every k batches or as set up in the dict."}
     )
