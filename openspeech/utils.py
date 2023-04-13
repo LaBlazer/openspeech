@@ -81,6 +81,7 @@ except ImportError:
 try:
     import pytorch_lightning as pl
     from pytorch_lightning.loggers import LightningLoggerBase, TensorBoardLogger, WandbLogger
+    from pytorch_lightning.utilities import rank_zero_only
 except ImportError:
     raise ValueError(PYTORCH_LIGHTNING_IMPORT_ERROR)
 
@@ -218,7 +219,8 @@ def parse_configs(configs: DictConfig) -> Tuple[Union[TensorBoardLogger, bool], 
             name=f"{configs.model.model_name}-{configs.dataset.dataset}",
             job_type="train",
         )
-        logger.experiment.config.update(OmegaConf.to_container(configs, resolve=True))
+        if rank_zero_only.rank == 0:
+            logger.experiment.config.update(OmegaConf.to_container(configs, resolve=True))
     else:
         logger = True
 
