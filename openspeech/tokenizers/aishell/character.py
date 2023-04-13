@@ -53,7 +53,7 @@ class AIShellCharacterTokenizer(Tokenizer):
             vocab_path=configs.tokenizer.vocab_path,
             encoding=configs.tokenizer.encoding,
         )
-        self.labels = self.vocab_dict.keys()
+        self.labels = list(self.vocab_dict.keys())
         self.sos_token = configs.tokenizer.sos_token
         self.eos_token = configs.tokenizer.eos_token
         self.pad_token = configs.tokenizer.pad_token

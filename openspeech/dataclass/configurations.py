@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 from dataclasses import _MISSING_TYPE, dataclass, field
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Union
 
 from omegaconf import MISSING
 
@@ -207,8 +207,8 @@ class BaseTrainerConfigs(OpenspeechDataclass):
     save_checkpoint_n_steps: int = field(
         default=10000, metadata={"help": "Save a checkpoint every N steps."}
     )
-    auto_scale_batch_size: str = field(
-        default="binsearch",
+    auto_scale_batch_size: bool = field(
+        default=False,
         metadata={
             "help": "If set to True, will initially run a batch size finder trying to find "
             "the largest batch size that fits into memory."
