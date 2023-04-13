@@ -218,7 +218,7 @@ def parse_configs(configs: DictConfig) -> Tuple[Union[TensorBoardLogger, bool], 
             name=f"{configs.model.model_name}-{configs.dataset.dataset}",
             job_type="train",
         )
-        logger.experiment.config = OmegaConf.to_container(configs, resolve=True)
+        logger.experiment.config.update(OmegaConf.to_container(configs, resolve=True))
     else:
         logger = True
 
