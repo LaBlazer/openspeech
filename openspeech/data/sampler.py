@@ -59,7 +59,7 @@ class RandomSampler(Sampler):
     def __len__(self):
         return len(self.bins)
 
-    def shuffle(self, epoch):
+    def shuffle(self):
         np.random.shuffle(self.bins)
 
 

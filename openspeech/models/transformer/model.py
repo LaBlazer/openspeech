@@ -21,8 +21,10 @@
 # SOFTWARE.
 
 from collections import OrderedDict
+from typing import Dict
 
 from omegaconf import DictConfig
+from torch import Tensor
 
 from openspeech.decoders import TransformerDecoder
 from openspeech.encoders import ConvolutionalTransformerEncoder, TransformerEncoder
@@ -60,7 +62,7 @@ class TransformerModel(OpenspeechEncoderDecoderModel):
 
         self.encoder = TransformerEncoder(
             input_dim=self.configs.audio.num_mels,
-            d_model=self.configs.model.d_model,
+            d_model=self.configs.model.encoder_dim,
             d_ff=self.configs.model.d_ff,
             num_layers=self.configs.model.num_encoder_layers,
             num_heads=self.configs.model.num_attention_heads,
@@ -70,7 +72,7 @@ class TransformerModel(OpenspeechEncoderDecoderModel):
         )
         self.decoder = TransformerDecoder(
             num_classes=self.num_classes,
-            d_model=self.configs.model.d_model,
+            d_model=self.configs.model.encoder_dim,
             d_ff=self.configs.model.d_ff,
             num_layers=self.configs.model.num_decoder_layers,
             num_heads=self.configs.model.num_attention_heads,
@@ -115,7 +117,7 @@ class JointCTCTransformerModel(OpenspeechEncoderDecoderModel):
         self.encoder = ConvolutionalTransformerEncoder(
             input_dim=self.configs.audio.num_mels,
             extractor=self.configs.model.extractor,
-            d_model=self.configs.model.d_model,
+            d_model=self.configs.model.encoder_dim,
             d_ff=self.configs.model.d_ff,
             num_layers=self.configs.model.num_encoder_layers,
             num_heads=self.configs.model.num_attention_heads,
@@ -125,7 +127,7 @@ class JointCTCTransformerModel(OpenspeechEncoderDecoderModel):
         )
         self.decoder = TransformerDecoder(
             num_classes=self.num_classes,
-            d_model=self.configs.model.d_model,
+            d_model=self.configs.model.encoder_dim,
             d_ff=self.configs.model.d_ff,
             num_layers=self.configs.model.num_decoder_layers,
             num_heads=self.configs.model.num_attention_heads,
@@ -149,7 +151,7 @@ class JointCTCTransformerModel(OpenspeechEncoderDecoderModel):
 @register_model("transformer_with_ctc", dataclass=TransformerWithCTCConfigs)
 class TransformerWithCTCModel(OpenspeechCTCModel):
     r"""
-    Transformer Encoder Only Model.
+    Convolutions + Transformer Encoder Model.
 
     Args:
         configs (DictConfig): configuration set.
@@ -165,11 +167,12 @@ class TransformerWithCTCModel(OpenspeechCTCModel):
 
     def __init__(self, configs: DictConfig, tokenizer: Tokenizer) -> None:
         super(TransformerWithCTCModel, self).__init__(configs, tokenizer)
-        self.fc = Linear(self.configs.model.d_model, self.num_classes, bias=False)
+        self.fc = Linear(self.configs.model.encoder_dim, self.num_classes, bias=False)
 
-        self.encoder = TransformerEncoder(
+        self.encoder = ConvolutionalTransformerEncoder(
             input_dim=self.configs.audio.num_mels,
-            d_model=self.configs.model.d_model,
+            extractor=self.configs.model.extractor,
+            d_model=self.configs.model.encoder_dim,
             d_ff=self.configs.model.d_ff,
             num_layers=self.configs.model.num_encoder_layers,
             num_heads=self.configs.model.num_attention_heads,
@@ -190,8 +193,8 @@ class TransformerWithCTCModel(OpenspeechCTCModel):
             loss (torch.Tensor): loss for training
         """
         inputs, targets, input_lengths, target_lengths = batch
-        logits, encoder_logits, output_lengths = self.encoder(inputs, input_lengths)
-        logits = self.fc(logits).log_softmax(dim=-1)
+        encoder_outputs, encoder_logits, output_lengths = self.encoder(inputs, input_lengths)
+        logits = self.fc(encoder_outputs).log_softmax(dim=-1)
         return self.collect_outputs(
             stage="train",
             logits=logits,
@@ -212,8 +215,8 @@ class TransformerWithCTCModel(OpenspeechCTCModel):
             loss (torch.Tensor): loss for training
         """
         inputs, targets, input_lengths, target_lengths = batch
-        logits, encoder_logits, output_lengths = self.encoder(inputs, input_lengths)
-        logits = self.fc(logits).log_softmax(dim=-1)
+        encoder_outputs, encoder_logits, output_lengths = self.encoder(inputs, input_lengths)
+        logits = self.fc(encoder_outputs).log_softmax(dim=-1)
         return self.collect_outputs(
             stage="valid",
             logits=logits,
@@ -234,8 +237,8 @@ class TransformerWithCTCModel(OpenspeechCTCModel):
             loss (torch.Tensor): loss for training
         """
         inputs, targets, input_lengths, target_lengths = batch
-        logits, encoder_logits, output_lengths = self.encoder(inputs, input_lengths)
-        logits = self.fc(logits).log_softmax(dim=-1)
+        encoder_outputs, encoder_logits, output_lengths = self.encoder(inputs, input_lengths)
+        logits = self.fc(encoder_outputs).log_softmax(dim=-1)
         return self.collect_outputs(
             stage="test",
             logits=logits,
@@ -269,7 +272,7 @@ class VGGTransformerModel(OpenspeechEncoderDecoderModel):
         self.encoder = ConvolutionalTransformerEncoder(
             input_dim=self.configs.audio.num_mels,
             extractor=self.configs.model.extractor,
-            d_model=self.configs.model.d_model,
+            d_model=self.configs.model.encoder_dim,
             d_ff=self.configs.model.d_ff,
             num_layers=self.configs.model.num_encoder_layers,
             num_heads=self.configs.model.num_attention_heads,
@@ -279,7 +282,7 @@ class VGGTransformerModel(OpenspeechEncoderDecoderModel):
         )
         self.decoder = TransformerDecoder(
             num_classes=self.num_classes,
-            d_model=self.configs.model.d_model,
+            d_model=self.configs.model.encoder_dim,
             d_ff=self.configs.model.d_ff,
             num_layers=self.configs.model.num_decoder_layers,
             num_heads=self.configs.model.num_attention_heads,

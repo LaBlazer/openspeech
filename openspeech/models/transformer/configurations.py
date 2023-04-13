@@ -37,7 +37,7 @@ class TransformerConfigs(OpenspeechDataclass):
 
     Args:
         model_name (str): Model name (default: transformer)
-        d_model (int): Dimension of model. (default: 512)
+        encoder_dim (int): Dimension of model. (default: 512)
         d_ff (int): Dimenstion of feed forward network. (default: 2048)
         num_attention_heads (int): The number of attention heads. (default: 8)
         num_encoder_layers (int): The number of encoder layers. (default: 12)
@@ -51,7 +51,7 @@ class TransformerConfigs(OpenspeechDataclass):
         optimizer (str): Optimizer for training. (default: adam)
     """
     model_name: str = field(default="transformer", metadata={"help": "Model name"})
-    d_model: int = field(default=512, metadata={"help": "Dimension of model."})
+    encoder_dim: int = field(default=512, metadata={"help": "Dimension of model."})
     d_ff: int = field(default=2048, metadata={"help": "Dimenstion of feed forward network."})
     num_attention_heads: int = field(default=8, metadata={"help": "The number of attention heads."})
     num_encoder_layers: int = field(default=12, metadata={"help": "The number of encoder layers."})
@@ -78,7 +78,7 @@ class JointCTCTransformerConfigs(OpenspeechDataclass):
     Args:
         model_name (str): Model name (default: joint_ctc_transformer)
         extractor (str): The CNN feature extractor. (default: conv2d_subsample)
-        d_model (int): Dimension of model. (default: 512)
+        encoder_dim (int): Dimension of model. (default: 512)
         d_ff (int): Dimenstion of feed forward network. (default: 2048)
         num_attention_heads (int): The number of attention heads. (default: 8)
         num_encoder_layers (int): The number of encoder layers. (default: 12)
@@ -93,7 +93,7 @@ class JointCTCTransformerConfigs(OpenspeechDataclass):
     """
     model_name: str = field(default="joint_ctc_transformer", metadata={"help": "Model name"})
     extractor: str = field(default="conv2d_subsample", metadata={"help": "The CNN feature extractor."})
-    d_model: int = field(default=512, metadata={"help": "Dimension of model."})
+    encoder_dim: int = field(default=512, metadata={"help": "Dimension of model."})
     d_ff: int = field(default=2048, metadata={"help": "Dimenstion of feed forward network."})
     num_attention_heads: int = field(default=8, metadata={"help": "The number of attention heads."})
     num_encoder_layers: int = field(default=12, metadata={"help": "The number of encoder layers."})
@@ -120,7 +120,7 @@ class TransformerWithCTCConfigs(OpenspeechDataclass):
     Args:
         model_name (str): Model name (default: transformer_with_ctc)
         extractor (str): The CNN feature extractor. (default: vgg)
-        d_model (int): Dimension of model. (default: 512)
+        encoder_dim (int): Dimension of model. (default: 512)
         d_ff (int): Dimenstion of feed forward network. (default: 2048)
         num_attention_heads (int): The number of attention heads. (default: 8)
         num_encoder_layers (int): The number of encoder layers. (default: 12)
@@ -129,12 +129,12 @@ class TransformerWithCTCConfigs(OpenspeechDataclass):
         optimizer (str): Optimizer for training. (default: adam)
     """
     model_name: str = field(default="transformer_with_ctc", metadata={"help": "Model name"})
-    d_model: int = field(default=512, metadata={"help": "Dimension of model."})
+    extractor: str = field(default="vgg", metadata={"help": "The CNN feature extractor."})
+    encoder_dim: int = field(default=512, metadata={"help": "Dimension of model."})
     d_ff: int = field(default=2048, metadata={"help": "Dimenstion of feed forward network."})
     num_attention_heads: int = field(default=8, metadata={"help": "The number of attention heads."})
     num_encoder_layers: int = field(default=12, metadata={"help": "The number of encoder layers."})
     encoder_dropout_p: float = field(default=0.3, metadata={"help": "The dropout probability of encoder."})
-    ffnet_style: str = field(default="ff", metadata={"help": "Style of feed forward network. (ff, conv)"})
     optimizer: str = field(default="adam", metadata={"help": "Optimizer for training."})
 
 
@@ -151,7 +151,7 @@ class VGGTransformerConfigs(OpenspeechDataclass):
     Args:
         model_name (str): Model name (default: vgg_transformer)
         extractor (str): The CNN feature extractor. (default: vgg)
-        d_model (int): Dimension of model. (default: 512)
+        encoder_dim (int): Dimension of model. (default: 512)
         d_ff (int): Dimenstion of feed forward network. (default: 2048)
         num_attention_heads (int): The number of attention heads. (default: 8)
         num_encoder_layers (int): The number of encoder layers. (default: 12)
@@ -166,7 +166,7 @@ class VGGTransformerConfigs(OpenspeechDataclass):
     """
     model_name: str = field(default="vgg_transformer", metadata={"help": "Model name"})
     extractor: str = field(default="vgg", metadata={"help": "The CNN feature extractor."})
-    d_model: int = field(default=512, metadata={"help": "Dimension of model."})
+    encoder_dim: int = field(default=512, metadata={"help": "Dimension of model."})
     d_ff: int = field(default=2048, metadata={"help": "Dimenstion of feed forward network."})
     num_attention_heads: int = field(default=8, metadata={"help": "The number of attention heads."})
     num_encoder_layers: int = field(default=12, metadata={"help": "The number of encoder layers."})
