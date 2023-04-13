@@ -23,6 +23,7 @@
 from typing import Dict
 
 import pytorch_lightning as pl
+from pytorch_lightning.utilities import rank_zero_only
 import torch
 import torch.nn as nn
 import wandb
@@ -80,6 +81,16 @@ class OpenspeechModel(pl.LightningModule):
             dictionary (dict): dictionary contains information.
         """
         self.log(dictionary, prog_bar=True, sync_dist=True)
+    
+    def define_metric(self, metric_name: str, summary="best", goal="minimize") -> None:
+        r"""
+        Define metric.
+
+        Args:
+            metric_name (str): metric name
+        """
+        if rank_zero_only.rank == 0:
+            wandb.define_metric(metric_name, summary=summary, goal=goal)
 
     def forward(self, inputs: torch.FloatTensor, input_lengths: torch.LongTensor) -> Dict[str, Tensor]:
         r"""
