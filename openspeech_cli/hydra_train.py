@@ -34,7 +34,7 @@ from openspeech.tokenizers import TOKENIZER_REGISTRY
 from openspeech.utils import get_pl_trainer, parse_configs
 
 
-@hydra.main(config_path=os.path.join("..", "openspeech", "configs"), config_name="train")
+@hydra.main(config_path=os.path.join("..", "openspeech", "configs"), config_name="train", version_base="1.1")
 def hydra_main(configs: DictConfig) -> None:
     rank_zero_info(OmegaConf.to_yaml(configs))
     pl.seed_everything(configs.trainer.seed)
