@@ -48,7 +48,7 @@ def hydra_main(configs: DictConfig) -> None:
 
     trainer = get_pl_trainer(configs, num_devices, logger)
     trainer.fit(model, data_module)
-    trainer.test()
+    trainer.test(ckpt_path='best')
 
 
 if __name__ == "__main__":
