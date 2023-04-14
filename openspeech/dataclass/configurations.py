@@ -195,6 +195,9 @@ class BaseTrainerConfigs(OpenspeechDataclass):
     check_val_every_n_epoch: int = field(
         default=1, metadata={"help": "Check val every n train epochs."}
     )
+    early_stopping_patience: Optional[int] = field(
+        default=None, metadata={"help": "Early stopping patience. If None, early stopping is disabled."}
+    )
     gradient_clip_val: float = field(
         default=5.0, metadata={"help": "0 means don’t clip."}
     )
@@ -207,8 +210,8 @@ class BaseTrainerConfigs(OpenspeechDataclass):
     max_steps: int = field(
         default=-1, metadata={"help": "If > 0: set total number of training steps to perform."}
     )
-    save_checkpoint_n_steps: int = field(
-        default=10000, metadata={"help": "Save a checkpoint every N steps."}
+    save_checkpoint_n_steps: Optional[int] = field(
+        default=10000, metadata={"help": "Save a checkpoint every N steps. If None, no checkpoint is saved."}
     )
     auto_scale_batch_size: bool = field(
         default=False,

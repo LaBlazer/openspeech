@@ -28,9 +28,9 @@ from typing import Iterable, Tuple, Union
 
 import torch
 from omegaconf import DictConfig, OmegaConf
-from pytorch_lightning.callbacks import LearningRateMonitor
+from pytorch_lightning.callbacks import LearningRateMonitor, EarlyStopping, ModelCheckpoint
 
-from .callbacks import CheckpointEveryNSteps
+from .callbacks import CheckpointEveryNSteps, DatasetShuffler
 
 PYTORCH_IMPORT_ERROR = """
 Openspeech requires the PyTorch library but it was not found in your environment. Checkout the instructions on the
@@ -234,6 +234,24 @@ def get_pl_trainer(
 
     if hasattr(configs.trainer, "amp_backend"):
         amp_backend = "apex" if configs.trainer.amp_backend == "apex" and is_apex_available() else "native"
+    
+    callbacks = [
+        LearningRateMonitor(logging_interval="step"), 
+        DatasetShuffler()
+    ]
+
+    if configs.trainer.save_checkpoint_n_steps and configs.trainer.save_checkpoint_n_steps > 0:
+        callbacks.append(
+            CheckpointEveryNSteps(configs.trainer.save_checkpoint_n_steps)
+        )
+    
+    if configs.trainer.early_stopping_patience and configs.trainer.early_stopping_patience > 0:
+        callbacks.append(
+            EarlyStopping(monitor="val_loss", patience=configs.trainer.early_stopping_patience, mode="min")
+        )
+        callbacks.append(
+            ModelCheckpoint(monitor="val_loss", save_top_k=1, mode="min")
+        )
 
     trainer_config = {
         "accelerator": "cpu",
@@ -247,10 +265,7 @@ def get_pl_trainer(
         "max_epochs": configs.trainer.max_epochs,
         "max_steps": configs.trainer.max_steps,
         "profiler": configs.trainer.profiler,
-        "callbacks": [
-            LearningRateMonitor(logging_interval="step"),
-            CheckpointEveryNSteps(configs.trainer.save_checkpoint_n_steps),
-        ],
+        "callbacks": callbacks,
     }
 
     devices = configs.trainer.devices if configs.trainer.devices else [i for i in range(num_devices)]
