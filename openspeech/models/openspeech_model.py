@@ -90,7 +90,7 @@ class OpenspeechModel(pl.LightningModule):
         Args:
             metric_name (str): metric name
         """
-        if rank_zero_only.rank == 0:
+        if rank_zero_only.rank == 0 and self.configs.trainer.logger == "wandb":
             wandb.define_metric(metric_name, summary=summary, goal=goal)
 
     def forward(self, inputs: torch.FloatTensor, input_lengths: torch.LongTensor) -> Dict[str, Tensor]:

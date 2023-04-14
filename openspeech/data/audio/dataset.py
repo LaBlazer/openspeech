@@ -176,7 +176,7 @@ class SpeechToTextDataset(Dataset):
         feature = self.transforms(signal)
 
         feature -= feature.mean()
-        feature /= np.std(feature)
+        feature /= np.std(feature) + 1e-5
 
         feature = torch.FloatTensor(feature).transpose(0, 1)
 
