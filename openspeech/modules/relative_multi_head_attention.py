@@ -118,6 +118,6 @@ class RelativeMultiHeadAttention(nn.Module):
         padded_pos_score = torch.cat([zeros, pos_score], dim=-1)
 
         padded_pos_score = padded_pos_score.view(batch_size, num_heads, seq_length2 + 1, seq_length1)
-        pos_score = padded_pos_score[:, :, 1:].view_as(pos_score)[:, :, :, : seq_length2 // 2 + 1]
+        pos_score = padded_pos_score[:, :, 1:].view_as(pos_score)
 
         return pos_score
