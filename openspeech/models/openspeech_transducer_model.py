@@ -90,17 +90,21 @@ class OpenspeechTransducerModel(OpenspeechModel):
         targets: torch.IntTensor,
         target_lengths: torch.IntTensor,
     ) -> OrderedDict:
-        predictions = logits.max(-1)[1]
-
         loss = self.criterion(
             logits=logits,
             targets=targets[:, 1:].contiguous().int(),
             input_lengths=input_lengths.int(),
             target_lengths=target_lengths.int(),
         )
+        predictions = logits.max(-1)[1]
+
+        wer = self.wer_metric(targets[:, 1:], predictions)
+        cer = self.cer_metric(targets[:, 1:], predictions)
 
         self.info(
             {
+                f"{stage}_wer": wer,
+                f"{stage}_cer": cer,
                 f"{stage}_loss": loss,
                 "learning_rate": self.get_lr(),
             }

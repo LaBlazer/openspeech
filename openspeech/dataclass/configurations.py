@@ -211,7 +211,7 @@ class BaseTrainerConfigs(OpenspeechDataclass):
         default=50, metadata={"help": "Stop training once this number of epochs is reached."}
     )
     max_steps: int = field(
-        default=-1, metadata={"help": "If > 0: set total number of training steps to perform."}
+        default=-1, metadata={"help": "If > 0: set total number of training steps to perform. (useful for debugging and testing)"}
     )
     save_checkpoint_n_steps: Optional[int] = field(
         default=10000, metadata={"help": "Save a checkpoint every N steps. If None, no checkpoint is saved."}
