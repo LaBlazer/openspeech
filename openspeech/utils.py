@@ -247,10 +247,12 @@ def get_pl_trainer(
     
     if configs.trainer.early_stopping_patience and configs.trainer.early_stopping_patience > 0:
         callbacks.append(
-            EarlyStopping(monitor="valid_wer", patience=configs.trainer.early_stopping_patience, mode="min")
+            EarlyStopping(monitor=configs.trainer.early_stopping_monitor, 
+                          patience=configs.trainer.early_stopping_patience, mode="min")
         )
         callbacks.append(
-            ModelCheckpoint(monitor="valid_wer", save_top_k=1, mode="min")
+            ModelCheckpoint(monitor=configs.trainer.early_stopping_monitor, 
+                            save_top_k=1, mode="min")
         )
 
     trainer_config = {

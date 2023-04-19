@@ -198,6 +198,9 @@ class BaseTrainerConfigs(OpenspeechDataclass):
     early_stopping_patience: Optional[int] = field(
         default=None, metadata={"help": "Early stopping patience. If None, early stopping is disabled."}
     )
+    early_stopping_monitor: str = field(
+        default="val_cer", metadata={"help": "Metric to monitor for early stopping. (val_loss, val_cer, val_wer)"}
+    )
     gradient_clip_val: float = field(
         default=5.0, metadata={"help": "0 means don’t clip."}
     )
@@ -205,7 +208,7 @@ class BaseTrainerConfigs(OpenspeechDataclass):
         default="wandb", metadata={"help": "Training logger. {wandb, tensorboard}"}
     )
     max_epochs: int = field(
-        default=20, metadata={"help": "Stop training once this number of epochs is reached."}
+        default=50, metadata={"help": "Stop training once this number of epochs is reached."}
     )
     max_steps: int = field(
         default=-1, metadata={"help": "If > 0: set total number of training steps to perform."}
