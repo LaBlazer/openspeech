@@ -89,6 +89,7 @@ class OpenspeechTransducerModel(OpenspeechModel):
         input_lengths: torch.IntTensor,
         targets: torch.IntTensor,
         target_lengths: torch.IntTensor,
+        encoder_outputs: torch.FloatTensor = None,
     ) -> OrderedDict:
         loss = self.criterion(
             logits=logits,
@@ -96,24 +97,33 @@ class OpenspeechTransducerModel(OpenspeechModel):
             input_lengths=input_lengths.int(),
             target_lengths=target_lengths.int(),
         )
-        predictions = logits.max(-1)[1]
+        
+        if encoder_outputs is not None:
+            predictions = self.decode(encoder_outputs=encoder_outputs[:1, :, :], 
+                                      max_length=encoder_outputs.size(1))
 
-        wer = self.wer_metric(targets[:, 1:], predictions)
-        cer = self.cer_metric(targets[:, 1:], predictions)
+            wer = self.wer_metric(targets[:1, 1:], predictions)
+            cer = self.cer_metric(targets[:1, 1:], predictions)
 
-        self.info(
-            {
-                f"{stage}_wer": wer,
-                f"{stage}_cer": cer,
-                f"{stage}_loss": loss,
-                "learning_rate": self.get_lr(),
-            }
-        )
+            self.info(
+                {
+                    f"{stage}_wer": wer,
+                    f"{stage}_cer": cer,
+                    f"{stage}_loss": loss,
+                    "learning_rate": self.get_lr(),
+                }
+            )
+        else:
+            self.info(
+                {
+                    f"{stage}_loss": loss,
+                    "learning_rate": self.get_lr(),
+                }
+            )
 
         return OrderedDict(
             {
                 "loss": loss,
-                "predictions": predictions,
                 "targets": targets,
                 "logits": logits,
             }
@@ -268,6 +278,7 @@ class OpenspeechTransducerModel(OpenspeechModel):
             input_lengths=output_lengths,
             targets=targets,
             target_lengths=target_lengths,
+            encoder_outputs=encoder_outputs,
         )
 
     def test_step(self, batch: tuple, batch_idx: int) -> OrderedDict:
@@ -297,4 +308,5 @@ class OpenspeechTransducerModel(OpenspeechModel):
             input_lengths=output_lengths,
             targets=targets,
             target_lengths=target_lengths,
+            encoder_outputs=encoder_outputs,
         )
