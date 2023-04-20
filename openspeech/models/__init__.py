@@ -144,6 +144,8 @@ from .transformer import (
     TransformerWithCTCModel,
     VGGTransformerConfigs,
     VGGTransformerModel,
+    TransformerPTConfigs,
+    TransformerPTModel,
 )
 from .transformer_lm import TransformerLanguageModel, TransformerLanguageModelConfigs
 from .transformer_transducer import TransformerTransducerConfigs, TransformerTransducerModel
@@ -213,4 +215,6 @@ __all__ = [
     "LSTMLanguageModelConfigs",
     "TransformerLanguageModel",
     "TransformerLanguageModelConfigs",
+    "TransformerPTConfigs",
+    "TransformerPTModel",
 ]
