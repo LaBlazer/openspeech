@@ -34,10 +34,10 @@ __all__ = [
     "TransformerConfigs",
     "TransformerWithCTCConfigs",
     "VGGTransformerConfigs",
+    "TransformerPTConfigs",
     "JointCTCTransformerModel",
     "TransformerModel",
     "TransformerWithCTCModel",
     "VGGTransformerModel",
-    "TransformerPTConfigs",
     "TransformerPTModel",
 ]
