@@ -112,17 +112,20 @@ class TransformerTransducerDecoder(OpenspeechDecoder):
 
             outputs = self.forward_step(
                 decoder_inputs=inputs,
-                decoder_input_lengths=input_lengths,
                 positional_encoding_length=target_lengths,
             )
 
         else:  # train
             target_lengths = inputs.size(1)
 
+            dec_self_attn_pad_mask = get_attn_pad_mask(inputs, input_lengths, target_lengths.size(1))
+            dec_self_attn_subsequent_mask = get_attn_subsequent_mask(target_lengths)
+            self_attn_mask = torch.gt((dec_self_attn_pad_mask + dec_self_attn_subsequent_mask), 0)
+
             outputs = self.forward_step(
                 decoder_inputs=inputs,
-                decoder_input_lengths=input_lengths,
                 positional_encoding_length=target_lengths,
+                self_attn_mask=self_attn_mask,
             )
 
         return outputs, input_lengths
@@ -130,13 +133,9 @@ class TransformerTransducerDecoder(OpenspeechDecoder):
     def forward_step(
         self,
         decoder_inputs: torch.Tensor,
-        decoder_input_lengths: torch.Tensor,
         positional_encoding_length: int = 1,
+        self_attn_mask: torch.Tensor = None,
     ) -> torch.Tensor:
-        dec_self_attn_pad_mask = get_attn_pad_mask(decoder_inputs, decoder_input_lengths, decoder_inputs.size(1))
-        dec_self_attn_subsequent_mask = get_attn_subsequent_mask(decoder_inputs)
-        self_attn_mask = torch.gt((dec_self_attn_pad_mask + dec_self_attn_subsequent_mask), 0)
-
         embedding_output = self.embedding(decoder_inputs) * self.scale
         positional_encoding_output = self.positional_encoding(positional_encoding_length)
         inputs = embedding_output + positional_encoding_output

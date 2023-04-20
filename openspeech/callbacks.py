@@ -68,3 +68,31 @@ class CheckpointEveryNSteps(pl.Callback):
                 filename = f"{epoch}_{global_step}.ckpt"
             ckpt_path = os.path.join(trainer.checkpoint_callback.dirpath, filename)
             trainer.save_checkpoint(ckpt_path)
+
+class DatasetShuffler(pl.Callback):
+    """Shuffle the dataset after each epoch"""
+
+    def _shuffle_dataloader(self, dataloader):
+        """Shuffle the dataset"""
+        if hasattr(dataloader, "batch_sampler") and \
+            hasattr(dataloader.batch_sampler, 'shuffle') and \
+            callable(dataloader.batch_sampler.shuffle):
+            dataloader.batch_sampler.shuffle()
+
+    def on_train_epoch_end(self, trainer: pl.Trainer, pl_module):
+        self._shuffle_dataloader(trainer.train_dataloader)
+        for dl in trainer.val_dataloaders:
+            self._shuffle_dataloader(dl)
+
+
+class GpuProfilerCallback(pl.Callback):
+    def __init__(self, gpu_id=0):
+        import sys
+        from openspeech.gpu_profiler import gpu_profile, gpu_eval
+        os.environ['GPU_DEBUG']=str(gpu_id)
+        print('Debugging gpu: ', os.environ['GPU_DEBUG'])
+        sys.settrace(gpu_profile)
+        self.gpu_eval = gpu_eval
+        
+    def on_after_backward(self, trainer: pl.Trainer, pl_module):
+        self.gpu_eval()

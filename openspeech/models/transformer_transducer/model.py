@@ -112,6 +112,5 @@ class TransformerTransducerModel(OpenspeechTransducerModel):
             targets = targets.max(1)[1]
             pred_tokens.append(targets)
 
-        pred_tokens = torch.stack(pred_tokens, dim=1)
+        return torch.stack(pred_tokens, dim=1)
 
-        return torch.LongTensor(pred_tokens)

@@ -63,10 +63,26 @@ class MultiHeadAttention(nn.Module):
 
         self.d_head = int(dim / num_heads)
         self.num_heads = num_heads
-        self.query_proj = Linear(dim, self.d_head * num_heads)
-        self.key_proj = Linear(dim, self.d_head * num_heads)
-        self.value_proj = Linear(dim, self.d_head * num_heads)
+        self.query_proj = Linear(dim, dim)
+        self.key_proj = Linear(dim, dim)
+        self.value_proj = Linear(dim, dim)
+        self.output_proj = Linear(dim, dim)
         self.scaled_dot_attn = DotProductAttention(dim, scale=True)
+    
+    def _reshape_to_batches(self, x: Tensor) -> Tensor:
+        batch_size, seq_len, in_feature = x.size()
+        sub_dim = in_feature // self.num_heads
+        return x.reshape(batch_size, seq_len, self.num_heads, sub_dim)\
+                .permute(0, 2, 1, 3)\
+                .reshape(batch_size * self.num_heads, seq_len, sub_dim)
+
+    def _reshape_from_batches(self, x: Tensor) -> Tensor:
+        batch_size, seq_len, in_feature = x.size()
+        batch_size //= self.num_heads
+        out_dim = in_feature * self.num_heads
+        return x.reshape(batch_size, self.num_heads, seq_len, in_feature)\
+                .permute(0, 2, 1, 3)\
+                .reshape(batch_size, seq_len, out_dim)
 
     def forward(
         self,
@@ -74,18 +90,15 @@ class MultiHeadAttention(nn.Module):
         key: Tensor,
         value: Tensor,
         mask: Optional[Tensor] = None,
-    ) -> Tuple[Tensor, Tensor]:
-        batch_size = value.size(0)
-
-        query = self.query_proj(query).view(batch_size, -1, self.num_heads, self.d_head).transpose(1, 2)
-        key = self.key_proj(key).view(batch_size, -1, self.num_heads, self.d_head).transpose(1, 2)
-        value = self.value_proj(value).view(batch_size, -1, self.num_heads, self.d_head).transpose(1, 2)
-
+    ) -> Tuple[Tensor]:
+        q, k, v = self.query_proj(query), self.key_proj(key), self.value_proj(value)
+        q, k, v = self._reshape_to_batches(q), self._reshape_to_batches(k), self._reshape_to_batches(v)
+        
         if mask is not None:
-            mask = mask.unsqueeze(1).repeat(1, self.num_heads, 1, 1)
+            mask = mask.repeat(self.num_heads, 1, 1)
 
-        context, attn = self.scaled_dot_attn(query, key, value, mask)
+        context = self.scaled_dot_attn(q, k, v, mask)
 
-        context = context.transpose(1, 2).reshape(batch_size, -1, self.num_heads * self.d_head)
+        context = self._reshape_from_batches(context)
 
-        return context, attn
+        return self.output_proj(context)

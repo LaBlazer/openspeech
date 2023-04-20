@@ -63,20 +63,9 @@ class DotProductAttention(nn.Module):
         key: Tensor,
         value: Tensor,
         mask: Optional[Tensor] = None,
-    ) -> Tuple[Tensor, Tensor]:
-        if len(query.size()) == 3:
-            score = torch.bmm(query, key.transpose(1, 2)) / self.sqrt_dim
-        else:
-            score = torch.matmul(query, key.transpose(2, 3)) / self.sqrt_dim
-
+    ) -> Tuple[Tensor]:
+        scores = query.matmul(key.transpose(-2, -1)) / self.sqrt_dim
         if mask is not None:
-            score.masked_fill_(mask, -1e4)
-
-        attn = F.softmax(score, -1)
-
-        if len(query.size()) == 3:
-            context = torch.bmm(attn, value)
-        else:
-            context = torch.matmul(attn, value)
-
-        return context, attn
+            scores = scores.masked_fill(mask == 0, -1e9)
+        attention = F.softmax(scores, dim=-1)
+        return attention.matmul(value)

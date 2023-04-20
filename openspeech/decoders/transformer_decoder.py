@@ -101,17 +101,15 @@ class TransformerDecoderLayer(nn.Module):
 
         Returns:
             outputs (torch.FloatTensor): output of transformer decoder layer
-            self_attn (torch.FloatTensor): output of self attention
-            encoder_attn (torch.FloatTensor): output of encoder attention
         """
         residual = inputs
         inputs = self.self_attention_prenorm(inputs)
-        outputs, self_attn = self.self_attention(inputs, inputs, inputs, self_attn_mask)
+        outputs = self.self_attention(inputs, inputs, inputs, self_attn_mask)
         outputs += residual
 
         residual = outputs
         outputs = self.decoder_attention_prenorm(outputs)
-        outputs, encoder_attn = self.decoder_attention(outputs, encoder_outputs, encoder_outputs, encoder_attn_mask)
+        outputs = self.decoder_attention(outputs, encoder_outputs, encoder_outputs, encoder_attn_mask)
         outputs += residual
 
         residual = outputs
@@ -119,7 +117,7 @@ class TransformerDecoderLayer(nn.Module):
         outputs = self.feed_forward(outputs)
         outputs += residual
 
-        return outputs, self_attn, encoder_attn
+        return outputs
 
 
 class TransformerDecoder(OpenspeechDecoder):
@@ -202,7 +200,7 @@ class TransformerDecoder(OpenspeechDecoder):
         outputs = self.input_dropout(outputs)
 
         for layer in self.layers:
-            outputs, self_attn, memory_attn = layer(
+            outputs = layer(
                 inputs=outputs,
                 encoder_outputs=encoder_outputs,
                 self_attn_mask=self_attn_mask,

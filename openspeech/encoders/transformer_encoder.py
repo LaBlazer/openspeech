@@ -72,7 +72,7 @@ class TransformerEncoderLayer(nn.Module):
         self.self_attention = MultiHeadAttention(d_model, num_heads)
         self.feed_forward = PositionwiseFeedForward(d_model, d_ff, dropout_p)
 
-    def forward(self, inputs: Tensor, self_attn_mask: Tensor = None) -> Tuple[Tensor, Tensor]:
+    def forward(self, inputs: Tensor, self_attn_mask: Tensor = None) -> Tuple[Tensor]:
         r"""
         Forward propagate of transformer encoder layer.
 
@@ -86,7 +86,7 @@ class TransformerEncoderLayer(nn.Module):
         """
         residual = inputs
         inputs = self.attention_prenorm(inputs)
-        outputs, attn = self.self_attention(inputs, inputs, inputs, self_attn_mask)
+        outputs = self.self_attention(inputs, inputs, inputs, self_attn_mask)
         outputs += residual
 
         residual = outputs
@@ -94,7 +94,7 @@ class TransformerEncoderLayer(nn.Module):
         outputs = self.feed_forward(outputs)
         outputs += residual
 
-        return outputs, attn
+        return outputs
 
 
 class TransformerEncoder(OpenspeechEncoder):
@@ -201,7 +201,7 @@ class TransformerEncoder(OpenspeechEncoder):
         outputs = self.input_dropout(outputs)
 
         for layer in self.layers:
-            outputs, attn = layer(outputs, self_attn_mask)
+            outputs = layer(outputs, self_attn_mask)
 
         if self.joint_ctc_attention:
             encoder_logits = self.fc(outputs.transpose(1, 2)).log_softmax(dim=-1)
