@@ -32,6 +32,7 @@ from openspeech.models import OpenspeechCTCModel, OpenspeechEncoderDecoderModel,
 from openspeech.models.transformer.configurations import (
     JointCTCTransformerConfigs,
     TransformerConfigs,
+    TransformerPTConfigs,
     TransformerWithCTCConfigs,
     VGGTransformerConfigs,
 )
@@ -92,6 +93,59 @@ class TransformerModel(OpenspeechEncoderDecoderModel):
             beam_size=beam_size,
         )
 
+
+@register_model("transformer_pt", dataclass=TransformerPTConfigs)
+class TransformerPTModel(OpenspeechEncoderDecoderModel):
+    r"""
+    A Speech Transformer model. User is able to modify the attributes as needed.
+    The model is based on the paper "Attention Is All You Need".
+
+    Args:
+        configs (DictConfig): configuration set.
+        tokenizer (Tokeizer): tokenizer is in charge of preparing the inputs for a model.
+
+    Inputs:
+        - **inputs** (torch.FloatTensor): A input sequence passed to encoders. Typically for inputs this will be a padded `FloatTensor` of size ``(batch, seq_length, dimension)``.
+        - **input_lengths** (torch.LongTensor): The length of input tensor. ``(batch)``
+
+    Returns:
+        outputs (dict): Result of model predictions.
+    """
+
+    def __init__(self, configs: DictConfig, tokenizer: Tokenizer) -> None:
+        super(TransformerPTModel, self).__init__(configs, tokenizer)
+
+        self.encoder = TransformerEncoder(
+            input_dim=self.configs.audio.num_mels,
+            d_model=self.configs.model.encoder_dim,
+            d_ff=self.configs.model.d_ff,
+            num_layers=self.configs.model.num_encoder_layers,
+            num_heads=self.configs.model.num_attention_heads,
+            dropout_p=self.configs.model.encoder_dropout_p,
+            joint_ctc_attention=self.configs.model.joint_ctc_attention,
+            num_classes=self.num_classes,
+        )
+        self.decoder = TransformerDecoder(
+            num_classes=self.num_classes,
+            d_model=self.configs.model.encoder_dim,
+            d_ff=self.configs.model.d_ff,
+            num_layers=self.configs.model.num_decoder_layers,
+            num_heads=self.configs.model.num_attention_heads,
+            dropout_p=self.configs.model.decoder_dropout_p,
+            pad_id=self.tokenizer.pad_id,
+            sos_id=self.tokenizer.sos_id,
+            eos_id=self.tokenizer.eos_id,
+            max_length=self.configs.model.max_length,
+        )
+
+    def set_beam_decoder(self, beam_size: int = 3):
+        """Setting beam search decoder"""
+        from openspeech.search import BeamSearchTransformer
+
+        self.decoder = BeamSearchTransformer(
+            decoder=self.decoder,
+            beam_size=beam_size,
+        )
 
 @register_model("joint_ctc_transformer", dataclass=JointCTCTransformerConfigs)
 class JointCTCTransformerModel(OpenspeechEncoderDecoderModel):
