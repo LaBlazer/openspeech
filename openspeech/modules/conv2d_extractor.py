@@ -66,10 +66,9 @@ class Conv2dExtractor(nn.Module):
     def get_output_lengths(self, seq_lengths: torch.Tensor):
         assert self.conv is not None, "self.conv should be defined"
 
-        if isinstance(self.conv, MaskConv2d):
-            return self.conv._get_sequence_lengths(seq_lengths)
+        iter_conv = self.conv.sequential if isinstance(self.conv, MaskConv2d) else self.conv
 
-        for module in self.conv:
+        for module in iter_conv:
             if isinstance(module, nn.Conv2d):
                 numerator = seq_lengths + 2 * module.padding[1] - module.dilation[1] * (module.kernel_size[1] - 1) - 1
                 seq_lengths = numerator.float() / float(module.stride[1])
