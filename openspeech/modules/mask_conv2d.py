@@ -80,7 +80,7 @@ class MaskConv2d(nn.Module):
 
         return output, seq_lengths
 
-    def get_sequence_lengths(self, module: nn.Module, seq_lengths: Tensor) -> Tensor:
+    def _get_sequence_lengths(self, module: nn.Module, seq_lengths: Tensor) -> Tensor:
         r"""
         Calculate convolutional neural network receptive formula
 

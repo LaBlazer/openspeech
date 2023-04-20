@@ -67,7 +67,7 @@ class Conv2dExtractor(nn.Module):
         assert self.conv is not None, "self.conv should be defined"
 
         if isinstance(self.conv, MaskConv2d):
-            return self.conv.get_output_lengths(seq_lengths)
+            return self.conv._get_sequence_lengths(seq_lengths)
 
         for module in self.conv:
             if isinstance(module, nn.Conv2d):
