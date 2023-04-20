@@ -71,9 +71,10 @@ class SmartBatchingSampler(Sampler):
         data_source (torch.utils.data.Dataset): dataset to sample from
         batch_size (int): size of batch
         drop_last (bool): flat indication whether to drop last batch or not
+        descending (bool): flag indicating whether to sort in descending order or not
     """
 
-    def __init__(self, data_source, batch_size: int = 32, drop_last: bool = False) -> None:
+    def __init__(self, data_source, batch_size: int = 32, drop_last: bool = False, descending: bool = True) -> None:
         super(SmartBatchingSampler, self).__init__(data_source)
         self.batch_size = batch_size
         self.data_source = data_source
@@ -83,7 +84,7 @@ class SmartBatchingSampler(Sampler):
         self.random = random.Random(42)
 
         audio_lengths = {idx: self._get_audio_length(audio_path) for idx, audio_path in enumerate(data_source.audio_paths)}
-        audio_indices = [x[0] for x in sorted(audio_lengths.items(), key=lambda x: x[1])]
+        audio_indices = [x[0] for x in sorted(audio_lengths.items(), key=lambda x: x[1], reverse=descending)]
 
         self.bins = [audio_indices[i : i + batch_size] for i in range(0, len(audio_indices), batch_size)]
         self.drop_last = drop_last

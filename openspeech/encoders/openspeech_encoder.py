@@ -23,7 +23,7 @@
 import torch.nn as nn
 from torch import Tensor
 
-from openspeech.modules import Conv2dSubsampling, DeepSpeech2Extractor, Swish, VGGExtractor
+from openspeech.modules import Conv2dSubsampling, DeepSpeech2Extractor, Swish, VGGExtractor, Conv2dExtractor
 
 
 class OpenspeechEncoder(nn.Module):
@@ -42,7 +42,7 @@ class OpenspeechEncoder(nn.Module):
         "gelu": nn.GELU(),
         "swish": Swish(),
     }
-    supported_extractors = {
+    supported_extractors : dict[str, Conv2dExtractor] = {
         "ds2": DeepSpeech2Extractor,
         "vgg": VGGExtractor,
         "conv2d_subsample": Conv2dSubsampling,

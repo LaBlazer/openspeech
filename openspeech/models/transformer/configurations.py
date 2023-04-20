@@ -204,7 +204,7 @@ class VGGTransformerConfigs(OpenspeechDataclass):
         optimizer (str): Optimizer for training. (default: adam)
     """
     model_name: str = field(default="vgg_transformer", metadata={"help": "Model name"})
-    extractor: str = field(default="conv2d_subsample", metadata={"help": "The CNN feature extractor."})
+    extractor: str = field(default="vgg", metadata={"help": "The CNN feature extractor."})
     encoder_dim: int = field(default=512, metadata={"help": "Dimension of model."})
     d_ff: int = field(default=2048, metadata={"help": "Dimenstion of feed forward network."})
     num_attention_heads: int = field(default=8, metadata={"help": "The number of attention heads."})

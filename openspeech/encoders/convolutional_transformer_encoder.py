@@ -64,7 +64,7 @@ class ConvolutionalTransformerEncoder(OpenspeechEncoder):
         self,
         num_classes: int,
         input_dim: int,
-        extractor: str = "conv2d",
+        extractor: str = "vgg",
         d_model: int = 512,
         d_ff: int = 2048,
         num_layers: int = 6,
@@ -75,9 +75,13 @@ class ConvolutionalTransformerEncoder(OpenspeechEncoder):
     ) -> None:
         super(ConvolutionalTransformerEncoder, self).__init__()
         extractor = self.supported_extractors[extractor.lower()]
-        self.conv = extractor(input_dim=input_dim, in_channels=1, out_channels=input_dim, 
-                              activation=conv_activation)
+        self.conv = extractor(input_dim=input_dim, activation=conv_activation)
         self.conv_output_dim = self.conv.get_output_dim()
+
+        test_lengths = torch.tensor([100, 200])
+        print("test_lengths before: ", test_lengths)
+        test_lengths = self.conv.get_output_lengths(test_lengths)
+        print("test_lengths after: ", test_lengths)
 
         self.num_classes = num_classes
         self.joint_ctc_attention = joint_ctc_attention
@@ -85,16 +89,16 @@ class ConvolutionalTransformerEncoder(OpenspeechEncoder):
         self.d_model = d_model
         self.num_layers = num_layers
         self.num_heads = num_heads
-        #self.input_proj = Linear(self.conv_output_dim, d_model)
-        self.input_norm = nn.LayerNorm(self.conv_output_dim)
+        self.input_proj = Linear(self.conv_output_dim, d_model)
+        self.input_norm = nn.LayerNorm(d_model)
         self.input_dropout = nn.Dropout(p=dropout_p)
-        self.positional_encoding = PositionalEncoding(self.conv_output_dim)
+        self.positional_encoding = PositionalEncoding(d_model)
         self.layers = nn.ModuleList(
             [
                 TransformerEncoderLayer(
-                    d_model=self.conv_output_dim,
+                    d_model=d_model,
                     num_heads=num_heads,
-                    d_ff=self.conv_output_dim * 2,
+                    d_ff=d_ff,
                     dropout_p=dropout_p,
                 )
                 for _ in range(num_layers)
@@ -135,8 +139,8 @@ class ConvolutionalTransformerEncoder(OpenspeechEncoder):
 
         self_attn_mask = get_attn_pad_mask(conv_outputs, output_lengths, conv_outputs.size(1))
 
-        #outputs = self.input_proj(conv_outputs)
-        outputs = self.input_norm(conv_outputs)
+        outputs = self.input_proj(conv_outputs)
+        outputs = self.input_norm(outputs)
         outputs += self.positional_encoding(outputs.size(1))
         outputs = self.input_dropout(outputs)
 
