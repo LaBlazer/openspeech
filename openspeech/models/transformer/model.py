@@ -26,8 +26,8 @@ from typing import Dict
 from omegaconf import DictConfig
 from torch import Tensor
 
-from openspeech.decoders import TransformerDecoder
-from openspeech.encoders import ConvolutionalTransformerEncoder, TransformerEncoder
+from openspeech.decoders import TransformerDecoder, TransformerDecoderPytorch
+from openspeech.encoders import ConvolutionalTransformerEncoder, TransformerEncoder, TransformerEncoderPytorch
 from openspeech.models import OpenspeechCTCModel, OpenspeechEncoderDecoderModel, register_model
 from openspeech.models.transformer.configurations import (
     JointCTCTransformerConfigs,
@@ -115,7 +115,7 @@ class TransformerPTModel(OpenspeechEncoderDecoderModel):
     def __init__(self, configs: DictConfig, tokenizer: Tokenizer) -> None:
         super(TransformerPTModel, self).__init__(configs, tokenizer)
 
-        self.encoder = TransformerEncoder(
+        self.encoder = TransformerEncoderPytorch(
             input_dim=self.configs.audio.num_mels,
             d_model=self.configs.model.encoder_dim,
             d_ff=self.configs.model.d_ff,
@@ -125,7 +125,7 @@ class TransformerPTModel(OpenspeechEncoderDecoderModel):
             joint_ctc_attention=self.configs.model.joint_ctc_attention,
             num_classes=self.num_classes,
         )
-        self.decoder = TransformerDecoder(
+        self.decoder = TransformerDecoderPytorch(
             num_classes=self.num_classes,
             d_model=self.configs.model.encoder_dim,
             d_ff=self.configs.model.d_ff,

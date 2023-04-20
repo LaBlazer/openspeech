@@ -29,7 +29,7 @@ from .jasper import Jasper
 from .lstm_encoder import LSTMEncoder
 from .rnn_transducer_encoder import RNNTransducerEncoder
 from .squeezeformer_encoder import SqueezeformerEncoder
-from .transformer_encoder import TransformerEncoder
+from .transformer_encoder import TransformerEncoder, TransformerEncoderPytorch
 from .transformer_transducer_encoder import TransformerTransducerEncoder
 
 __all__ = [
@@ -44,4 +44,5 @@ __all__ = [
     "SqueezeformerEncoder",
     "TransformerEncoder",
     "TransformerTransducerEncoder",
+    "TransformerEncoderPytorch",
 ]

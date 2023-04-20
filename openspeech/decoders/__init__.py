@@ -23,7 +23,7 @@
 from .openspeech_decoder import OpenspeechDecoder
 from .lstm_attention_decoder import LSTMAttentionDecoder
 from .rnn_transducer_decoder import RNNTransducerDecoder
-from .transformer_decoder import TransformerDecoder
+from .transformer_decoder import TransformerDecoder, TransformerDecoderPytorch
 from .transformer_transducer_decoder import TransformerTransducerDecoder
 
 __all__ = [
@@ -32,4 +32,5 @@ __all__ = [
     "RNNTransducerDecoder",
     "TransformerDecoder",
     "TransformerTransducerDecoder",
+    "TransformerDecoderPytorch",
 ]
