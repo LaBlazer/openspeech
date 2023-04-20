@@ -115,7 +115,7 @@ class SlovakSpeechConfigs(BaseDatasetConfigs):
         default=True, metadata={"help": "Flag indication whether to download dataset or not."}
     )
     text_min_length: int = field(
-        default=1, metadata={"help": "Minimum length of text in characters"}
+        default=2, metadata={"help": "Minimum length of text in characters"}
     )
     text_max_length: int = field(
         default=400, metadata={"help": "Maximum length of text in characters"}
