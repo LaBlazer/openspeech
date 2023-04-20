@@ -25,8 +25,9 @@ from .configurations import (
     TransformerConfigs,
     TransformerWithCTCConfigs,
     VGGTransformerConfigs,
+    TransformerPTConfigs
 )
-from .model import JointCTCTransformerModel, TransformerModel, TransformerWithCTCModel, VGGTransformerModel
+from .model import JointCTCTransformerModel, TransformerModel, TransformerWithCTCModel, VGGTransformerModel, TransformerPTModel
 
 __all__ = [
     "JointCTCTransformerConfigs",
@@ -37,4 +38,6 @@ __all__ = [
     "TransformerModel",
     "TransformerWithCTCModel",
     "VGGTransformerModel",
+    "TransformerPTConfigs",
+    "TransformerPTModel",
 ]
