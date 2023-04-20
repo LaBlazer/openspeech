@@ -77,7 +77,7 @@ class ConvolutionalTransformerEncoder(OpenspeechEncoder):
         extractor = self.supported_extractors[extractor.lower()]
         self.conv = extractor(input_dim=input_dim, in_channels=1, out_channels=input_dim, 
                               activation=conv_activation)
-        self.conv_output_dim = self.conv.output_dim()
+        self.conv_output_dim = self.conv.get_output_dim()
 
         self.num_classes = num_classes
         self.joint_ctc_attention = joint_ctc_attention
