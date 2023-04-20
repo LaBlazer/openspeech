@@ -147,6 +147,7 @@ class TransformerPTModel(OpenspeechEncoderDecoderModel):
             beam_size=beam_size,
         )
 
+
 @register_model("joint_ctc_transformer", dataclass=JointCTCTransformerConfigs)
 class JointCTCTransformerModel(OpenspeechEncoderDecoderModel):
     r"""

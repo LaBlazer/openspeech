@@ -108,17 +108,7 @@ class OpenspeechEncoderDecoderModel(OpenspeechModel):
             }
         )
 
-        return OrderedDict(
-            {
-                "loss": loss,
-                "cross_entropy_loss": cross_entropy_loss,
-                "ctc_loss": ctc_loss,
-                "predictions": predictions,
-                "targets": targets,
-                "logits": logits,
-                "learning_rate": self.get_lr(),
-            }
-        )
+        return loss
 
     def forward(self, inputs: Tensor, input_lengths: Tensor) -> Dict[str, Tensor]:
         r"""

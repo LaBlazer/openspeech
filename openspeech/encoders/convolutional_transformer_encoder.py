@@ -64,7 +64,7 @@ class ConvolutionalTransformerEncoder(OpenspeechEncoder):
         self,
         num_classes: int,
         input_dim: int,
-        extractor: str = "vgg",
+        extractor: str = "conv2d",
         d_model: int = 512,
         d_ff: int = 2048,
         num_layers: int = 6,
@@ -84,16 +84,16 @@ class ConvolutionalTransformerEncoder(OpenspeechEncoder):
         self.d_model = d_model
         self.num_layers = num_layers
         self.num_heads = num_heads
-        self.input_proj = Linear(self.conv_output_dim, d_model)
-        self.input_norm = nn.LayerNorm(d_model)
+        #self.input_proj = Linear(self.conv_output_dim, d_model)
+        self.input_norm = nn.LayerNorm(self.conv_output_dim)
         self.input_dropout = nn.Dropout(p=dropout_p)
-        self.positional_encoding = PositionalEncoding(d_model)
+        self.positional_encoding = PositionalEncoding(self.conv_output_dim)
         self.layers = nn.ModuleList(
             [
                 TransformerEncoderLayer(
-                    d_model=d_model,
+                    d_model=self.conv_output_dim,
                     num_heads=num_heads,
-                    d_ff=d_ff,
+                    d_ff=self.conv_output_dim * 2,
                     dropout_p=dropout_p,
                 )
                 for _ in range(num_layers)
@@ -134,12 +134,13 @@ class ConvolutionalTransformerEncoder(OpenspeechEncoder):
 
         self_attn_mask = get_attn_pad_mask(conv_outputs, output_lengths, conv_outputs.size(1))
 
-        outputs = self.input_norm(self.input_proj(conv_outputs))
+        #outputs = self.input_proj(conv_outputs)
+        outputs = self.input_norm(conv_outputs)
         outputs += self.positional_encoding(outputs.size(1))
         outputs = self.input_dropout(outputs)
 
         for layer in self.layers:
-            outputs, attn = layer(outputs, self_attn_mask)
+            outputs = layer(outputs, self_attn_mask)
 
         if self.joint_ctc_attention:
             encoder_logits = self.fc(outputs.transpose(1, 2)).log_softmax(dim=-1)
