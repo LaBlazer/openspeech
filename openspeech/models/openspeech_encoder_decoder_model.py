@@ -55,6 +55,7 @@ class OpenspeechEncoderDecoderModel(OpenspeechModel):
     ) -> None:
         super(OpenspeechEncoderDecoderModel, self).__init__(configs, tokenizer)
         self.teacher_forcing_ratio = configs.model.teacher_forcing_ratio
+        self.max_length = configs.model.max_length
         self.encoder = None
         self.decoder = None
 
@@ -72,12 +73,14 @@ class OpenspeechEncoderDecoderModel(OpenspeechModel):
     ) -> OrderedDict:
         cross_entropy_loss, ctc_loss = None, None
 
+        targets = targets[:, 1:self.max_length + 1]
+
         if get_class_name(self.criterion) == "JointCTCCrossEntropyLoss":
             loss, ctc_loss, cross_entropy_loss = self.criterion(
                 encoder_logits=encoder_logits.transpose(0, 1),
                 logits=logits,
                 output_lengths=encoder_output_lengths,
-                targets=targets[:, 1:],
+                targets=targets,
                 target_lengths=target_lengths,
             )
             self.info(
@@ -91,15 +94,15 @@ class OpenspeechEncoderDecoderModel(OpenspeechModel):
             get_class_name(self.criterion) == "LabelSmoothedCrossEntropyLoss"
             or get_class_name(self.criterion) == "CrossEntropyLoss"
         ):
-            loss = self.criterion(logits, targets[:, 1:])
+            loss = self.criterion(logits, targets)
             self.info({f"{stage}_loss": loss})
         else:
             raise ValueError(f"Unsupported criterion: {self.criterion}")
 
         predictions = logits.max(-1)[1]
 
-        wer = self.wer_metric(targets[:, 1:], predictions)
-        cer = self.cer_metric(targets[:, 1:], predictions)
+        wer = self.wer_metric(targets, predictions)
+        cer = self.cer_metric(targets, predictions)
 
         self.info(
             {
