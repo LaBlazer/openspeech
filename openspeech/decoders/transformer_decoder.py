@@ -241,9 +241,7 @@ class TransformerDecoder(OpenspeechDecoder):
                 encoder_output_pad_mask=get_attn_pad_mask(encoder_outputs, encoder_output_lengths, targets_size),
                 positional_encoding_length=targets_size,
             )
-            step_outputs = self.fc(step_outputs).log_softmax(dim=-1)
-            print(step_outputs.shape)
-            return step_outputs
+            return self.fc(step_outputs).log_softmax(dim=-1)
 
         # Inference
         else:

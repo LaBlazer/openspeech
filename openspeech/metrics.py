@@ -58,6 +58,8 @@ class ErrorRate(object):
         targets_decoded = [self.tokenizer.decode(t) for t in targets]
         y_hats_decoded = [self.tokenizer.decode(y) for y in y_hats]
 
+        print(y_hats_decoded)
+
         return self.metric(targets_decoded, y_hats_decoded) 
 
     def metric(self, *args, **kwargs) -> Tuple[float, int]:
