@@ -232,16 +232,17 @@ class TransformerDecoder(OpenspeechDecoder):
 
         if targets is not None and use_teacher_forcing:
             targets = targets[targets != self.eos_id].view(batch_size, -1)
-            expand_size = targets.size(1)
+            targets_size = targets.size(1)
 
             step_outputs = self.forward_step(
                 decoder_inputs=targets,
-                decoder_input_pad_mask=get_attn_pad_mask(targets, target_lengths, expand_size),
+                decoder_input_pad_mask=get_attn_pad_mask(targets, target_lengths, targets_size),
                 encoder_outputs=encoder_outputs,
-                encoder_output_pad_mask=get_attn_pad_mask(encoder_outputs, encoder_output_lengths, expand_size),
-                positional_encoding_length=targets.size(1),
+                encoder_output_pad_mask=get_attn_pad_mask(encoder_outputs, encoder_output_lengths, targets_size),
+                positional_encoding_length=targets_size,
             )
             step_outputs = self.fc(step_outputs).log_softmax(dim=-1)
+            print(step_outputs.shape)
             return step_outputs
 
         # Inference
