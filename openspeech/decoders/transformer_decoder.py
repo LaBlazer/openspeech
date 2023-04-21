@@ -177,7 +177,12 @@ class TransformerDecoder(OpenspeechDecoder):
                 for _ in range(num_layers)
             ]
         )
-        self.fc = Linear(d_model, num_classes)
+        self.fc = nn.Sequential(
+            nn.LayerNorm(d_model),
+            Linear(d_model, d_model, bias=False),
+            nn.Tanh(),
+            Linear(d_model, num_classes, bias=False),
+        )
 
     def forward_step(
         self,
