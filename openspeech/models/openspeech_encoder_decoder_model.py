@@ -201,6 +201,7 @@ class OpenspeechEncoderDecoderModel(OpenspeechModel):
         logits = self.decoder(
             encoder_outputs,
             encoder_output_lengths=encoder_output_lengths,
+            target_lengths=target_lengths,
             teacher_forcing_ratio=0.0,
         )
         return self.collect_outputs(
@@ -229,6 +230,7 @@ class OpenspeechEncoderDecoderModel(OpenspeechModel):
         logits = self.decoder(
             encoder_outputs,
             encoder_output_lengths=encoder_output_lengths,
+            target_lengths=target_lengths,
             teacher_forcing_ratio=0.0,
         )
         return self.collect_outputs(

@@ -240,7 +240,6 @@ class TransformerDecoder(OpenspeechDecoder):
                 positional_encoding_length=targets.size(1),
             )
             step_outputs = self.fc(step_outputs).log_softmax(dim=-1)
-            print(step_outputs.size())
             return step_outputs
 
         # Inference
@@ -258,13 +257,8 @@ class TransformerDecoder(OpenspeechDecoder):
                     positional_encoding_length=di,
                 )
                 step_outputs = self.fc(outputs).log_softmax(dim=-1)
-                print(step_outputs.size())
-                print(step_outputs[:, -1, :].topk(1)[1].squeeze().size())
-                print(dec_inputs)
-
                 dec_inputs[:, di] = step_outputs[:, -1, :].topk(1)[1].squeeze()
 
-            print(step_outputs.size())
             return step_outputs
 
 
