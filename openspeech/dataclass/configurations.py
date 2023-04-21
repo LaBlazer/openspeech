@@ -227,6 +227,9 @@ class BaseTrainerConfigs(OpenspeechDataclass):
         default="else", metadata={"help": "smart: batching with similar sequence length." 
                                           "else: random batch"}
     )
+    sampler_descending: bool = field(
+        default=False, metadata={"help": "If True, batches are returned in descending order."}
+    )
     profiler: Optional[str] = field(
         default=None, metadata={"help": "Profiler for training. (simple, advanced...)"}
     )

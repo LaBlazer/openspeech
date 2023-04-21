@@ -191,8 +191,6 @@ class TransformerDecoder(OpenspeechDecoder):
         outputs = self.embedding(decoder_inputs) + self.positional_encoding(positional_encoding_length)
         outputs = self.input_dropout(outputs)
 
-        print(outputs.shape)
-
         for layer in self.layers:
             outputs = layer(
                 tgt=outputs,
