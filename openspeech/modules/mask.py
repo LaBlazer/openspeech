@@ -50,11 +50,9 @@ def get_attn_pad_mask(inputs, input_lengths, expand_length):
 
 
 def get_attn_subsequent_mask(seq):
-    assert seq.dim() == 2
-    attn_shape = [seq.size(0), seq.size(1), seq.size(1)]
-    subsequent_mask = torch.triu(torch.ones(attn_shape), diagonal=1)
-
-    if seq.is_cuda:
-        subsequent_mask = subsequent_mask.cuda()
+    sz_b, len_s = seq.size()
+    subsequent_mask = torch.triu(
+        torch.ones((len_s, len_s), device=seq.device, dtype=torch.uint8), diagonal=1)
+    subsequent_mask = subsequent_mask.unsqueeze(0).expand(sz_b, -1, -1)  # b x ls x ls
 
     return subsequent_mask
