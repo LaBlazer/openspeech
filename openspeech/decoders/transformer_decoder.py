@@ -204,8 +204,8 @@ class TransformerDecoder(OpenspeechDecoder):
             outputs = layer(
                 tgt=outputs,
                 memory=encoder_outputs,
-                tgt_mask=self_attn_mask,
-                memory_mask=encoder_attn_mask,
+                tgt_key_padding_mask=self_attn_mask,
+                memory_key_padding_mask=encoder_attn_mask,
             )
 
         return outputs
