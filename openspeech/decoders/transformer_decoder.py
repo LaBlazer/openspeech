@@ -202,10 +202,10 @@ class TransformerDecoder(OpenspeechDecoder):
 
         for layer in self.layers:
             outputs = layer(
-                inputs=outputs,
-                encoder_outputs=encoder_outputs,
-                self_attn_mask=self_attn_mask,
-                encoder_attn_mask=encoder_attn_mask,
+                tgt=outputs,
+                memory=encoder_outputs,
+                tgt_mask=self_attn_mask,
+                memory_mask=encoder_attn_mask,
             )
 
         return outputs
