@@ -191,6 +191,8 @@ class TransformerDecoder(OpenspeechDecoder):
         outputs = self.embedding(decoder_inputs) + self.positional_encoding(positional_encoding_length)
         outputs = self.input_dropout(outputs)
 
+        print(outputs.shape)
+
         for layer in self.layers:
             outputs = layer(
                 tgt=outputs,
@@ -244,10 +246,10 @@ class TransformerDecoder(OpenspeechDecoder):
         # Inference
         else:
             max_target_length = target_lengths.max().item() if target_lengths is not None else self.max_length
-            step_outputs = torch.full((batch_size, max_target_length), self.sos_id, dtype=torch.long, device=encoder_outputs.device)
+            dec_inputs = torch.full((batch_size, max_target_length), self.sos_id, dtype=torch.long, device=encoder_outputs.device)
 
             for di in range(1, max_target_length):
-                inp = step_outputs[:, :di]
+                inp = dec_inputs[:, :di]
                 outputs = self.forward_step(
                     decoder_inputs=inp,
                     decoder_input_pad_mask=get_transformer_non_pad_mask(inp, input_length=di),
@@ -255,12 +257,12 @@ class TransformerDecoder(OpenspeechDecoder):
                     encoder_output_pad_mask=get_transformer_non_pad_mask(encoder_outputs, encoder_output_lengths),
                     positional_encoding_length=di,
                 )
-                step_output = self.fc(outputs).log_softmax(dim=-1)
-                print(step_output.size())
-                print(step_output[:, -1, :].topk(1)[1].squeeze().size())
-                print(step_outputs)
+                step_outputs = self.fc(outputs).log_softmax(dim=-1)
+                print(step_outputs.size())
+                print(step_outputs[:, -1, :].topk(1)[1].squeeze().size())
+                print(dec_inputs)
 
-                step_outputs[:, di] = step_output[:, -1, :].topk(1)[1].squeeze()
+                dec_inputs[:, di] = step_outputs[:, -1, :].topk(1)[1].squeeze()
 
             print(step_outputs.size())
             return step_outputs
