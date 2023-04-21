@@ -197,7 +197,7 @@ class TransformerDecoder(OpenspeechDecoder):
         self_attn_mask = torch.gt((dec_self_attn_pad_mask + dec_self_attn_subsequent_mask), 0)
         print(self_attn_mask)
         print(self_attn_mask.shape)
-        self_attn_mask = self_attn_mask.repeat_interleave(self.num_heads)
+        self_attn_mask = self_attn_mask.repeat_interleave(self.num_heads, dim=0)
         print(self_attn_mask)
         print(self_attn_mask.shape)
 
