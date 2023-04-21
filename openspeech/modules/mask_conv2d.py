@@ -62,10 +62,7 @@ class MaskConv2d(nn.Module):
 
         for module in self.sequential:
             output = module(inputs)
-            mask = torch.BoolTensor(output.size()).fill_(0)
-
-            if output.is_cuda:
-                mask = mask.cuda()
+            mask = torch.zeros(output.size(), dtype=torch.bool, device=output.device)
 
             seq_lengths = self._get_sequence_lengths(module, seq_lengths)
 

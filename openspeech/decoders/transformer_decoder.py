@@ -262,7 +262,7 @@ class TransformerDecoder(OpenspeechDecoder):
                 input_lengths = torch.IntTensor(batch_size).fill_(di)
 
                 outputs = self.forward_step(
-                    decoder_inputs=input_var[:, :di],
+                    decoder_inputs=input_var,
                     decoder_input_lengths=input_lengths,
                     encoder_outputs=encoder_outputs,
                     encoder_output_lengths=encoder_output_lengths,
