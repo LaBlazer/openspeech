@@ -146,7 +146,7 @@ class ConvolutionalTransformerEncoder(OpenspeechEncoder):
         outputs = self.input_dropout(outputs)
 
         for layer in self.layers:
-            outputs = layer(outputs, self_attn_mask)
+            outputs = layer(outputs, src_key_padding_mask=self_attn_mask)
 
         if self.joint_ctc_attention:
             encoder_logits = self.fc(outputs.transpose(1, 2)).log_softmax(dim=-1)

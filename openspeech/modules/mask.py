@@ -31,7 +31,7 @@ def get_transformer_non_pad_mask(inputs: Tensor, input_lengths: Tensor) -> Tenso
         if len(inputs.size()) == 2:
             non_pad_mask = inputs.new_ones(inputs.size())  # B x T
         elif len(inputs.size()) == 3:
-            non_pad_mask = inputs.new_ones(inputs.size()[1:])  # B x T
+            non_pad_mask = inputs.new_ones(inputs.size()[:-1])  # B x T
         else:
             raise ValueError(f"Unsupported input shape {inputs.size()}")
 
