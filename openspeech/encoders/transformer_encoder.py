@@ -154,11 +154,12 @@ class TransformerEncoder(OpenspeechEncoder):
         self.positional_encoding = PositionalEncoding(d_model)
         self.layers = nn.ModuleList(
             [
-                TransformerEncoderLayer(
+                nn.TransformerEncoderLayer(
                     d_model=d_model,
-                    num_heads=num_heads,
-                    d_ff=d_ff,
-                    dropout_p=dropout_p,
+                    nhead=num_heads,
+                    dim_feedforward=d_ff,
+                    dropout=dropout_p,
+                    batch_first=True,
                 )
                 for _ in range(num_layers)
             ]

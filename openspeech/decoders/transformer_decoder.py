@@ -166,11 +166,12 @@ class TransformerDecoder(OpenspeechDecoder):
         self.input_dropout = nn.Dropout(p=dropout_p)
         self.layers = nn.ModuleList(
             [
-                TransformerDecoderLayer(
+                nn.TransformerDecoderLayer(
                     d_model=d_model,
-                    num_heads=num_heads,
-                    d_ff=d_ff,
-                    dropout_p=dropout_p,
+                    nhead=num_heads,
+                    dim_feedforward=d_ff,
+                    dropout=dropout_p,
+                    batch_first=True,
                 )
                 for _ in range(num_layers)
             ]
