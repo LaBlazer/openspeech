@@ -68,9 +68,6 @@ class MultiHeadAttention(nn.Module):
         self.key_proj = Linear(dim, dim)
         self.value_proj = Linear(dim, dim)
         self.output_proj = Linear(dim, dim)
-        nn.init.normal_(self.query_proj.weight, mean=0, std=np.sqrt(2.0 / (dim + self.d_head)))
-        nn.init.normal_(self.key_proj.weight, mean=0, std=np.sqrt(2.0 / (dim + self.d_head)))
-        nn.init.normal_(self.value_proj.weight, mean=0, std=np.sqrt(2.0 / (dim + self.d_head)))
         self.scaled_dot_attn = DotProductAttention(dim, scale=True)
 
 
