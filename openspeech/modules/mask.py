@@ -46,17 +46,20 @@ def get_transformer_non_pad_mask(inputs: Tensor, input_lengths: Tensor = None,
 
         return non_pad_mask.lt(1)
 
-def get_attn_pad_mask(inputs, input_lengths, expand_length):
+def expand_mask(mask, expand_length):
     """mask position is set to 1"""
-    pad_mask = get_transformer_non_pad_mask(inputs, input_lengths)
-    #pad_mask = pad_mask.unsqueeze(1).expand(-1, expand_length, -1)
-    return pad_mask
+    return mask.unsqueeze(1).expand(-1, expand_length, -1)
+
+def get_attn_pad_mask(inputs, input_lengths, expand_length, input_length=None):
+    """mask position is set to 1"""
+    pad_mask = get_transformer_non_pad_mask(inputs, input_lengths, input_length)
+    return expand_mask(pad_mask, expand_length)
 
 
 def get_attn_subsequent_mask(seq):
     sz_b, len_s = seq.size()
     subsequent_mask = torch.triu(
         torch.ones((len_s, len_s), device=seq.device, dtype=torch.bool), diagonal=1)
-    #subsequent_mask = subsequent_mask.unsqueeze(0).expand(sz_b, -1, -1)  # b x ls x ls
+    subsequent_mask = subsequent_mask.unsqueeze(0).expand(sz_b, -1, -1)  # b x ls x ls
 
     return subsequent_mask

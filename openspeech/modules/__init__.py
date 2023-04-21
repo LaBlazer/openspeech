@@ -39,7 +39,7 @@ from .glu import GLU
 from .jasper_block import JasperBlock
 from .jasper_subblock import JasperSubBlock
 from .location_aware_attention import LocationAwareAttention
-from .mask import get_attn_pad_mask, get_attn_subsequent_mask, get_transformer_non_pad_mask
+from .mask import get_attn_pad_mask, get_attn_subsequent_mask, get_transformer_non_pad_mask, expand_mask
 from .mask_conv1d import MaskConv1d
 from .mask_conv2d import MaskConv2d
 from .multi_head_attention import MultiHeadAttention

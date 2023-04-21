@@ -167,12 +167,11 @@ class TransformerDecoder(OpenspeechDecoder):
         self.input_dropout = nn.Dropout(p=dropout_p)
         self.layers = nn.ModuleList(
             [
-                nn.TransformerDecoderLayer(
+                TransformerDecoderLayer(
                     d_model=d_model,
-                    nhead=num_heads,
-                    dim_feedforward=d_ff,
-                    dropout=dropout_p,
-                    batch_first=True,
+                    num_heads=num_heads,
+                    d_ff=d_ff,
+                    dropout_p=dropout_p,
                 )
                 for _ in range(num_layers)
             ]
@@ -192,17 +191,16 @@ class TransformerDecoder(OpenspeechDecoder):
         encoder_output_pad_mask: torch.Tensor,
         positional_encoding_length: int,
     ) -> torch.Tensor:
-        tgt_mask = get_attn_subsequent_mask(decoder_inputs)
+        self_mask = get_attn_subsequent_mask(decoder_inputs) + decoder_input_pad_mask
         outputs = self.embedding(decoder_inputs) + self.positional_encoding(positional_encoding_length)
         outputs = self.input_dropout(outputs)
 
         for layer in self.layers:
             outputs = layer(
-                tgt=outputs,
-                memory=encoder_outputs,
-                tgt_mask=tgt_mask,
-                tgt_key_padding_mask=decoder_input_pad_mask,
-                memory_key_padding_mask=encoder_output_pad_mask,
+                inputs=outputs,
+                self_attn_mask=self_mask,
+                encoder_outputs=encoder_outputs,
+                encoder_attn_mask=encoder_output_pad_mask,
             )
 
         return outputs
@@ -234,12 +232,13 @@ class TransformerDecoder(OpenspeechDecoder):
 
         if targets is not None and use_teacher_forcing:
             targets = targets[targets != self.eos_id].view(batch_size, -1)
+            expand_size = targets.size(1)
 
             step_outputs = self.forward_step(
                 decoder_inputs=targets,
-                decoder_input_pad_mask=get_transformer_non_pad_mask(targets, target_lengths),
+                decoder_input_pad_mask=get_attn_pad_mask(targets, target_lengths, expand_size),
                 encoder_outputs=encoder_outputs,
-                encoder_output_pad_mask=get_transformer_non_pad_mask(encoder_outputs, encoder_output_lengths),
+                encoder_output_pad_mask=get_attn_pad_mask(encoder_outputs, encoder_output_lengths, expand_size),
                 positional_encoding_length=targets.size(1),
             )
             step_outputs = self.fc(step_outputs).log_softmax(dim=-1)
@@ -252,11 +251,12 @@ class TransformerDecoder(OpenspeechDecoder):
 
             for di in range(1, max_target_length):
                 inp = dec_inputs[:, :di]
+                expand_size = inp.size(1)
                 outputs = self.forward_step(
                     decoder_inputs=inp,
-                    decoder_input_pad_mask=get_transformer_non_pad_mask(inp, input_length=di),
+                    decoder_input_pad_mask=get_attn_pad_mask(inp, None, expand_size, input_length=di),
                     encoder_outputs=encoder_outputs,
-                    encoder_output_pad_mask=get_transformer_non_pad_mask(encoder_outputs, encoder_output_lengths),
+                    encoder_output_pad_mask=get_attn_pad_mask(encoder_outputs, encoder_output_lengths, expand_size),
                     positional_encoding_length=di,
                 )
                 step_outputs = self.fc(outputs).log_softmax(dim=-1)

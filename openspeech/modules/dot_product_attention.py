@@ -68,5 +68,6 @@ class DotProductAttention(nn.Module):
         scores = query.bmm(key.transpose(-2, -1)) / self.sqrt_dim
         if mask is not None:
             scores = scores.masked_fill(mask, -1e9)
+        print(scores)
         attention = self.softmax(scores)
         return attention.bmm(value)
