@@ -177,26 +177,17 @@ class TransformerDecoder(OpenspeechDecoder):
                 for _ in range(num_layers)
             ]
         )
-        self.fc = nn.Sequential(
-            nn.LayerNorm(d_model),
-            Linear(d_model, d_model, bias=False),
-            nn.Tanh(),
-            Linear(d_model, num_classes, bias=False),
-        )
+        self.fc = Linear(d_model, num_classes)
 
     def forward_step(
         self,
         decoder_inputs: torch.Tensor,
-        decoder_input_lengths: torch.Tensor,
         encoder_outputs: torch.Tensor,
-        encoder_output_lengths: torch.Tensor,
+        decoder_input_pad_mask: torch.Tensor,
+        encoder_output_pad_mask: torch.Tensor,
         positional_encoding_length: int,
     ) -> torch.Tensor:
-        dec_self_attn_pad_mask = get_attn_pad_mask(decoder_inputs, decoder_input_lengths, decoder_inputs.size(1))
-        dec_self_attn_subsequent_mask = get_attn_subsequent_mask(decoder_inputs)
-
-        encoder_attn_mask = get_transformer_non_pad_mask(encoder_outputs, encoder_output_lengths)
-
+        tgt_mask = get_attn_subsequent_mask(decoder_inputs)
         outputs = self.embedding(decoder_inputs) + self.positional_encoding(positional_encoding_length)
         outputs = self.input_dropout(outputs)
 
@@ -204,9 +195,9 @@ class TransformerDecoder(OpenspeechDecoder):
             outputs = layer(
                 tgt=outputs,
                 memory=encoder_outputs,
-                tgt_mask=dec_self_attn_subsequent_mask,
-                tgt_key_padding_mask=dec_self_attn_pad_mask,
-                memory_key_padding_mask=encoder_attn_mask,
+                tgt_mask=tgt_mask,
+                tgt_key_padding_mask=decoder_input_pad_mask,
+                memory_key_padding_mask=encoder_output_pad_mask,
             )
 
         return outputs
@@ -233,49 +224,43 @@ class TransformerDecoder(OpenspeechDecoder):
         Returns:
             * logits (torch.FloatTensor): Log probability of model predictions.
         """
-        logits = list()
         batch_size = encoder_outputs.size(0)
         use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
 
         if targets is not None and use_teacher_forcing:
             targets = targets[targets != self.eos_id].view(batch_size, -1)
-            target_length = targets.size(1)
 
             step_outputs = self.forward_step(
                 decoder_inputs=targets,
-                decoder_input_lengths=target_lengths,
+                decoder_input_pad_mask=get_transformer_non_pad_mask(targets, target_lengths),
                 encoder_outputs=encoder_outputs,
-                encoder_output_lengths=encoder_output_lengths,
-                positional_encoding_length=target_length,
+                encoder_output_pad_mask=get_transformer_non_pad_mask(encoder_outputs, encoder_output_lengths),
+                positional_encoding_length=targets.size(1),
             )
             step_outputs = self.fc(step_outputs).log_softmax(dim=-1)
-
-            for di in range(step_outputs.size(1)):
-                step_output = step_outputs[:, di, :]
-                logits.append(step_output)
+            print(step_outputs.size())
+            return step_outputs
 
         # Inference
         else:
-            input_var = encoder_outputs.new_zeros(batch_size, self.max_length).long()
-            input_var = input_var.fill_(self.pad_id)
-            input_var[:, 0] = self.sos_id
+            max_target_length = target_lengths.max().item() if target_lengths is not None else self.max_length
+            step_outputs = torch.full((batch_size, max_target_length), self.sos_id, dtype=torch.long, device=encoder_outputs.device)
 
-            for di in range(1, self.max_length):
-                input_lengths = torch.IntTensor(batch_size).fill_(di)
-
+            for di in range(1, max_target_length):
+                inp = step_outputs[:, :di]
                 outputs = self.forward_step(
-                    decoder_inputs=input_var[:, :di],
-                    decoder_input_lengths=input_lengths,
+                    decoder_inputs=inp,
+                    decoder_input_pad_mask=get_transformer_non_pad_mask(inp, input_length=di),
                     encoder_outputs=encoder_outputs,
-                    encoder_output_lengths=encoder_output_lengths,
+                    encoder_output_pad_mask=get_transformer_non_pad_mask(encoder_outputs, encoder_output_lengths),
                     positional_encoding_length=di,
                 )
                 step_output = self.fc(outputs).log_softmax(dim=-1)
 
-                logits.append(step_output[:, -1, :])
-                input_var[:, di] = logits[-1].topk(1)[1].squeeze()
+                step_outputs[:, di] = step_output[:, -1, :].topk(1)[1].squeeze()
 
-        return torch.stack(logits, dim=1)
+            print(step_outputs.size())
+            return step_outputs
 
 
 class TransformerDecoderPytorch(OpenspeechDecoder):

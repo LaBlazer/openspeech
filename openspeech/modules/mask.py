@@ -24,7 +24,8 @@ import torch
 from torch import Tensor
 
 
-def get_transformer_non_pad_mask(inputs: Tensor, input_lengths: Tensor) -> Tensor:
+def get_transformer_non_pad_mask(inputs: Tensor, input_lengths: Tensor = None, 
+                                 input_length: int = None) -> Tensor:
         """Padding position is set to 0, either use input_lengths or pad_id"""
         batch_size = inputs.size(0)
 
@@ -35,8 +36,13 @@ def get_transformer_non_pad_mask(inputs: Tensor, input_lengths: Tensor) -> Tenso
         else:
             raise ValueError(f"Unsupported input shape {inputs.size()}")
 
-        for i in range(batch_size):
-            non_pad_mask[i, input_lengths[i] :] = 0
+        if input_lengths is not None:
+            for i in range(batch_size):
+                non_pad_mask[i, input_lengths[i] :] = 0
+        elif input_length is not None:
+            non_pad_mask[:, input_length :] = 0
+        else:
+            raise ValueError("Either input_lengths or input_length should be provided")
 
         return non_pad_mask.lt(1)
 
