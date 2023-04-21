@@ -195,11 +195,6 @@ class TransformerDecoder(OpenspeechDecoder):
         dec_self_attn_pad_mask = get_attn_pad_mask(decoder_inputs, decoder_input_lengths, decoder_inputs.size(1))
         dec_self_attn_subsequent_mask = get_attn_subsequent_mask(decoder_inputs)
         self_attn_mask = torch.gt((dec_self_attn_pad_mask + dec_self_attn_subsequent_mask), 0)
-        print(self_attn_mask)
-        print(self_attn_mask.shape)
-        self_attn_mask = self_attn_mask.repeat_interleave(self.num_heads, dim=0)
-        print(self_attn_mask)
-        print(self_attn_mask.shape)
 
         encoder_attn_mask = get_transformer_non_pad_mask(encoder_outputs, encoder_output_lengths)
 
@@ -210,7 +205,7 @@ class TransformerDecoder(OpenspeechDecoder):
             outputs = layer(
                 tgt=outputs,
                 memory=encoder_outputs,
-                tgt_mask=self_attn_mask,
+                tgt_key_padding_mask=self_attn_mask,
                 memory_key_padding_mask=encoder_attn_mask,
             )
 
