@@ -256,6 +256,9 @@ class TransformerDecoder(OpenspeechDecoder):
                     positional_encoding_length=di,
                 )
                 step_output = self.fc(outputs).log_softmax(dim=-1)
+                print(step_output.size())
+                print(step_output[:, -1, :].topk(1)[1].squeeze().size())
+                print(step_outputs)
 
                 step_outputs[:, di] = step_output[:, -1, :].topk(1)[1].squeeze()
 
