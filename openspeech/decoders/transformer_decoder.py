@@ -245,7 +245,8 @@ class TransformerDecoder(OpenspeechDecoder):
 
         # Inference
         else:
-            max_target_length = target_lengths.max().item() if target_lengths is not None else self.max_length
+            max_target_length = min(target_lengths.max().item(), self.max_length) if target_lengths is not None \
+                                else self.max_length
             dec_inputs = torch.full((batch_size, max_target_length), self.sos_id, dtype=torch.long, device=encoder_outputs.device)
 
             for di in range(1, max_target_length):
