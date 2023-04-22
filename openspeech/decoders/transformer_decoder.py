@@ -191,7 +191,7 @@ class TransformerDecoder(OpenspeechDecoder):
         encoder_output_pad_mask: torch.Tensor,
         positional_encoding_length: int,
     ) -> torch.Tensor:
-        self_mask = torch.gt((get_attn_subsequent_mask(decoder_inputs) + decoder_input_pad_mask), 0)
+        self_mask = get_attn_subsequent_mask(decoder_inputs).logical_or(decoder_input_pad_mask)
         outputs = self.embedding(decoder_inputs) + self.positional_encoding(positional_encoding_length)
         outputs = self.input_dropout(outputs)
 
