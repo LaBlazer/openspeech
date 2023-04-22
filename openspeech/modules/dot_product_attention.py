@@ -64,8 +64,8 @@ class DotProductAttention(nn.Module):
         value: Tensor,
         mask: Optional[Tensor] = None,
     ) -> Tuple[Tensor]:
-        scores = query.matmul(key.transpose(-2, -1)) / self.sqrt_dim
+        scores = query.bmm(key.transpose(-2, -1)) / self.sqrt_dim
         if mask is not None:
             scores = scores.masked_fill(mask, -1e9)
         attention = F.softmax(scores, 2)
-        return attention.matmul(value)
+        return attention.bmm(value)
