@@ -69,7 +69,21 @@ class MultiHeadAttention(nn.Module):
         self.value_proj = Linear(dim, dim)
         self.output_proj = Linear(dim, dim)
         self.scaled_dot_attn = DotProductAttention(dim, scale=True)
+    
+    def _reshape_to_batches(self, x: Tensor) -> Tensor:
+        batch_size, seq_len, in_feature = x.size()
+        sub_dim = in_feature // self.num_heads
+        return x.reshape(batch_size, seq_len, self.num_heads, sub_dim)\
+                .permute(0, 2, 1, 3)\
+                .reshape(batch_size * self.num_heads, seq_len, sub_dim)
 
+    def _reshape_from_batches(self, x: Tensor) -> Tensor:
+        batch_size, seq_len, in_feature = x.size()
+        batch_size //= self.num_heads
+        out_dim = in_feature * self.num_heads
+        return x.reshape(batch_size, self.num_heads, seq_len, in_feature)\
+                .permute(0, 2, 1, 3)\
+                .reshape(batch_size, seq_len, out_dim)
 
     def forward(
         self,
@@ -78,22 +92,14 @@ class MultiHeadAttention(nn.Module):
         value: Tensor,
         mask: Optional[Tensor] = None,
     ) -> Tuple[Tensor]:
-        d_head, n_head = self.d_head, self.num_heads
-        batch_size, len_q, len_k, len_v = query.size(0), query.size(1), key.size(1), value.size(1)
-
-        q = self.query_proj(query).view(batch_size, len_q, n_head, d_head)
-        k = self.key_proj(key).view(batch_size, len_k, n_head, d_head)
-        v = self.value_proj(value).view(batch_size, len_v, n_head, d_head)
-
-        q = q.permute(2, 0, 1, 3).contiguous().view(-1, len_q, d_head)
-        k = k.permute(2, 0, 1, 3).contiguous().view(-1, len_k, d_head)
-        v = v.permute(2, 0, 1, 3).contiguous().view(-1, len_v, d_head)
+        q, k, v = self.query_proj(query), self.key_proj(key), self.value_proj(value)
+        q, k, v = self._reshape_to_batches(q), self._reshape_to_batches(k), self._reshape_to_batches(v)
         
         if mask is not None:
             mask = mask.repeat(self.num_heads, 1, 1)
 
-        output = self.scaled_dot_attn(q, k, v, mask)
-        output = output.view(n_head, batch_size, len_q, d_head)
-        output = output.permute(1, 2, 0, 3).contiguous().view(batch_size, len_q, -1)
+        context = self.scaled_dot_attn(q, k, v, mask)
 
-        return self.output_proj(output)
+        context = self._reshape_from_batches(context)
+
+        return self.output_proj(context)
