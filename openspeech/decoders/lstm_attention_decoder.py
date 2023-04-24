@@ -162,6 +162,7 @@ class LSTMAttentionDecoder(OpenspeechDecoder):
         self,
         encoder_outputs: torch.Tensor,
         targets: Optional[torch.Tensor] = None,
+        target_lengths: Optional[torch.Tensor] = None,
         encoder_output_lengths: Optional[torch.Tensor] = None,
         teacher_forcing_ratio: float = 1.0,
     ) -> torch.Tensor:
