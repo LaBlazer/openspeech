@@ -226,6 +226,8 @@ class LSTMAttentionDecoder(OpenspeechDecoder):
                 outputs[:, di, :] = step_outputs
                 input_var = step_outputs.topk(1)[1]
 
+            print(step_outputs.shape)
+            print(step_outputs)
             return outputs
 
     def validate_args(
