@@ -22,7 +22,7 @@
 
 from omegaconf import DictConfig
 
-from openspeech.decoders import LSTMAttentionDecoder
+from openspeech.decoders import LSTMAttentionDecoder, LSTMDecoder
 from openspeech.encoders import ConvolutionalLSTMEncoder, LSTMEncoder
 from openspeech.models import OpenspeechEncoderDecoderModel, register_model
 from openspeech.models.listen_attend_spell.configurations import (
@@ -311,7 +311,7 @@ class DeepCNNWithJointCTCListenAttendSpellModel(OpenspeechEncoderDecoderModel):
             if self.configs.model.encoder_bidirectional
             else self.configs.model.hidden_state_dim
         )
-        self.decoder = LSTMAttentionDecoder(
+        self.decoder = LSTMDecoder(
             num_classes=self.num_classes,
             max_length=self.configs.model.max_length,
             hidden_state_dim=decoder_hidden_state_dim,

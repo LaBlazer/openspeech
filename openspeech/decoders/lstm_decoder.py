@@ -74,7 +74,6 @@ class LSTMDecoder(OpenspeechDecoder):
         pad_id: int = 0,
         sos_id: int = 1,
         eos_id: int = 2,
-        num_heads: int = 4,
         num_layers: int = 2,
         rnn_type: str = "lstm",
         dropout_p: float = 0.3,
@@ -82,7 +81,6 @@ class LSTMDecoder(OpenspeechDecoder):
         super(LSTMDecoder, self).__init__()
         self.hidden_state_dim = hidden_state_dim
         self.num_classes = num_classes
-        self.num_heads = num_heads
         self.num_layers = num_layers
         self.max_length = max_length
         self.eos_id = eos_id
@@ -112,7 +110,6 @@ class LSTMDecoder(OpenspeechDecoder):
         self,
         input_var: torch.Tensor,
         hidden_states: Optional[torch.Tensor],
-        encoder_outputs: torch.Tensor,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
         batch_size, output_lengths = input_var.size(0), input_var.size(1)
 
@@ -151,25 +148,24 @@ class LSTMDecoder(OpenspeechDecoder):
         Returns:
             * logits (torch.FloatTensor): Log probability of model predictions.
         """
-        hidden_states = None, None
+        hidden_states = encoder_outputs
 
         targets, batch_size, max_length = self.validate_args(targets, encoder_outputs, teacher_forcing_ratio)
         use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
+        outputs = torch.zeros(batch_size, max_length, self.num_classes, device=encoder_outputs.device)
 
         if use_teacher_forcing:
             targets = targets[targets != self.eos_id].view(batch_size, -1)
 
-            step_outputs, hidden_states = self.forward_step(
-                input_var=targets,
-                hidden_states=hidden_states,
-                encoder_outputs=encoder_outputs,
-            )
-
-            return step_outputs
+            for di in range(1, max_length):
+                step_outputs, hidden_states = self.forward_step(
+                    input_var=targets[:, di - 1].unsqueeze(1),
+                    hidden_states=hidden_states,
+                )
+                outputs[:, di, :] = step_outputs
 
         else:
             input_var = targets[:, 0].unsqueeze(1)
-            logits = list()
 
             for di in range(1, max_length):
                 step_outputs, hidden_states = self.forward_step(
@@ -177,10 +173,10 @@ class LSTMDecoder(OpenspeechDecoder):
                     hidden_states=hidden_states,
                     encoder_outputs=encoder_outputs,
                 )
-                logits.append(step_outputs)
-                input_var = logits[-1].topk(1)[1]
+                outputs[:, di, :] = step_outputs
+                input_var = step_outputs.argmax(dim=-1, keepdim=True)
 
-            return torch.stack(logits, dim=1)
+        return outputs
 
     def validate_args(
         self,
