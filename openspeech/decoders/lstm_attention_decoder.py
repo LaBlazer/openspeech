@@ -149,7 +149,7 @@ class LSTMAttentionDecoder(OpenspeechDecoder):
         if self.attn_mechanism == "loc":
             context, attn = self.attention(outputs, encoder_outputs, attn)
         else:
-            context, attn = self.attention(outputs, encoder_outputs, encoder_outputs)
+            context = self.attention(outputs, encoder_outputs, encoder_outputs)
 
         outputs = torch.cat((outputs, context), dim=2)
 
