@@ -192,7 +192,7 @@ class LSTMDecoder(OpenspeechDecoder):
 
         if targets is None:  # inference
             max_length = self.max_length
-            targets = torch.full((batch_size, 1, 1), self.sos_id, dtype=torch.long, device=encoder_outputs.device)
+            targets = torch.full((batch_size, 1), self.sos_id, dtype=torch.long, device=encoder_outputs.device)
 
             if teacher_forcing_ratio > 0:
                 raise ValueError("Teacher forcing has to be disabled (set 0) when no targets is provided.")
