@@ -171,7 +171,6 @@ class LSTMDecoder(OpenspeechDecoder):
                 step_outputs, hidden_states = self.forward_step(
                     input_var=input_var,
                     hidden_states=hidden_states,
-                    encoder_outputs=encoder_outputs,
                 )
                 outputs[:, di, :] = step_outputs
                 input_var = step_outputs.argmax(dim=-1, keepdim=True)
