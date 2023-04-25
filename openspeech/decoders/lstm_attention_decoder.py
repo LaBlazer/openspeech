@@ -188,6 +188,7 @@ class LSTMAttentionDecoder(OpenspeechDecoder):
             targets = targets[targets != self.eos_id].view(batch_size, -1)
 
             if self.attn_mechanism == "loc" or self.attn_mechanism == "additive":
+                outputs = torch.zeros(batch_size, max_length, self.num_classes, device=encoder_outputs.device)
                 for di in range(targets.size(1)):
                     input_var = targets[:, di].unsqueeze(1)
                     step_outputs, hidden_states, attn = self.forward_step(
@@ -196,10 +197,9 @@ class LSTMAttentionDecoder(OpenspeechDecoder):
                         encoder_outputs=encoder_outputs,
                         attn=attn,
                     )
-                    
-                    print(step_outputs.shape)
-                    print(step_outputs)
-                    return step_outputs
+                    outputs[:, di, :] = step_outputs
+                
+                return outputs
 
             else:
                 step_outputs, hidden_states, attn = self.forward_step(
