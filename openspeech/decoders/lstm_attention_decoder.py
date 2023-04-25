@@ -179,7 +179,6 @@ class LSTMAttentionDecoder(OpenspeechDecoder):
         Returns:
             * logits (torch.FloatTensor): Log probability of model predictions.
         """
-        logits = list()
         hidden_states, attn = None, None
 
         targets, batch_size, max_length = self.validate_args(targets, encoder_outputs, teacher_forcing_ratio)
@@ -197,7 +196,8 @@ class LSTMAttentionDecoder(OpenspeechDecoder):
                         encoder_outputs=encoder_outputs,
                         attn=attn,
                     )
-                    logits.append(step_outputs)
+                    
+                    return step_outputs
 
             else:
                 step_outputs, hidden_states, attn = self.forward_step(
@@ -207,12 +207,11 @@ class LSTMAttentionDecoder(OpenspeechDecoder):
                     attn=attn,
                 )
 
-                for di in range(step_outputs.size(1)):
-                    step_output = step_outputs[:, di, :]
-                    logits.append(step_output)
+                return step_outputs
 
         else:
             input_var = targets[:, 0].unsqueeze(1)
+            outputs = torch.zeros(batch_size, max_length, self.num_classes, device=encoder_outputs.device)
 
             for di in range(max_length):
                 step_outputs, hidden_states, attn = self.forward_step(
@@ -221,12 +220,10 @@ class LSTMAttentionDecoder(OpenspeechDecoder):
                     encoder_outputs=encoder_outputs,
                     attn=attn,
                 )
-                logits.append(step_outputs)
-                input_var = logits[-1].topk(1)[1]
+                outputs[:, di, :] = step_outputs
+                input_var = step_outputs.topk(1)[1]
 
-        logits = torch.stack(logits, dim=1)
-
-        return logits
+            return outputs
 
     def validate_args(
         self,
@@ -238,11 +235,9 @@ class LSTMAttentionDecoder(OpenspeechDecoder):
         batch_size = encoder_outputs.size(0)
 
         if targets is None:  # inference
-            targets = torch.LongTensor([self.sos_id] * batch_size).view(batch_size, 1)
             max_length = self.max_length
 
-            if torch.cuda.is_available():
-                targets = targets.cuda()
+            targets = torch.full((batch_size, 1), self.sos_id, dtype=torch.long, device=encoder_outputs.device)
 
             if teacher_forcing_ratio > 0:
                 raise ValueError("Teacher forcing has to be disabled (set 0) when no targets is provided.")
