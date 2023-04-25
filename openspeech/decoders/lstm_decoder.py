@@ -115,7 +115,11 @@ class LSTMDecoder(OpenspeechDecoder):
 
         embedded = self.embedding(input_var)
         print(embedded.size())
+        print(hidden_states.size())
         embedded = self.input_dropout(embedded)
+
+        print(embedded.size())
+        print(hidden_states.size())
 
         if self.training:
             self.rnn.flatten_parameters()
@@ -167,9 +171,6 @@ class LSTMDecoder(OpenspeechDecoder):
 
         else:
             input_var = targets[:, 0].unsqueeze(1)
-            print(hidden_states.shape)
-            print(targets.shape)
-            print(targets[:, 0].unsqueeze(1).shape)
 
             for di in range(1, max_length):
                 step_outputs, hidden_states = self.forward_step(
