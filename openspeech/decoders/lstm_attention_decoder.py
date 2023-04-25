@@ -207,6 +207,9 @@ class LSTMAttentionDecoder(OpenspeechDecoder):
                     attn=attn,
                 )
 
+                print(step_outputs.shape)
+                print(step_outputs)
+
                 return step_outputs
 
         else:
