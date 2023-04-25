@@ -318,10 +318,10 @@ class DeepCNNWithJointCTCListenAttendSpellModel(OpenspeechEncoderDecoderModel):
             pad_id=self.tokenizer.pad_id,
             sos_id=self.tokenizer.sos_id,
             eos_id=self.tokenizer.eos_id,
-            num_heads=self.configs.model.num_attention_heads,
+            #num_heads=self.configs.model.num_attention_heads,
             dropout_p=self.configs.model.decoder_dropout_p,
             num_layers=self.configs.model.num_decoder_layers,
-            attn_mechanism=self.configs.model.decoder_attn_mechanism,
+            #attn_mechanism=self.configs.model.decoder_attn_mechanism,
             rnn_type=self.configs.model.rnn_type,
         )
 
