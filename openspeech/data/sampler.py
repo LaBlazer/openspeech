@@ -110,7 +110,7 @@ class SmartBatchingDistributedSampler(DistributedSampler):
     """
 
     def __init__(self, data_source, seed: int = 0, 
-                 batch_size: int = 32, drop_last: bool = False) -> None:
+                 batch_size: int = 32, drop_last: bool = False, descending: bool = True) -> None:
         super(SmartBatchingDistributedSampler, self).__init__(data_source)
         
         self.batch_size = batch_size
@@ -121,7 +121,7 @@ class SmartBatchingDistributedSampler(DistributedSampler):
         logging.info("Loading audio lengths...")
 
         audio_lengths = {idx: self._get_audio_length(audio_path) for idx, audio_path in enumerate(data_source.audio_paths)}
-        audio_indices = [x[0] for x in sorted(audio_lengths.items(), key=lambda x: x[1])]
+        audio_indices = [x[0] for x in sorted(audio_lengths.items(), key=lambda x: x[1], reverse=descending)]
 
         self.bins = [audio_indices[i : i + batch_size] for i in range(0, len(audio_indices), batch_size)]
         self.drop_last = drop_last
