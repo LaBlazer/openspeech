@@ -24,7 +24,7 @@ import importlib
 import logging
 import platform
 from collections import OrderedDict
-from typing import Iterable, Tuple, Union
+from typing import Iterable, List, Tuple, Union
 
 import torch
 from omegaconf import DictConfig, OmegaConf
@@ -211,6 +211,11 @@ def parse_configs(configs: DictConfig) -> Tuple[Union[TensorBoardLogger, bool], 
     logger.info(OmegaConf.to_yaml(configs))
     num_devices = _check_environment(configs.trainer.use_cuda, logger)
 
+    devices = configs.trainer.devices if configs.trainer.devices else [i for i in range(num_devices)]
+    
+    if len(devices) <= 1:
+        configs.trainer.strategy = None
+
     if configs.trainer.logger == "tensorboard":
         logger = TensorBoardLogger("logs/")
     elif configs.trainer.logger == "wandb":
@@ -224,11 +229,11 @@ def parse_configs(configs: DictConfig) -> Tuple[Union[TensorBoardLogger, bool], 
     else:
         logger = True
 
-    return logger, num_devices
+    return logger, devices
 
 
 def get_pl_trainer(
-    configs: DictConfig, num_devices: int, logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool]
+    configs: DictConfig, devices: List[int], logger: Union[LightningLoggerBase, Iterable[LightningLoggerBase], bool]
 ) -> pl.Trainer:
     amp_backend = None
 
@@ -255,11 +260,6 @@ def get_pl_trainer(
             ModelCheckpoint(monitor=configs.trainer.early_stopping_monitor, 
                             save_top_k=1, mode="min")
         )
-    
-    devices = configs.trainer.devices if configs.trainer.devices else [i for i in range(num_devices)]
-    
-    if len(devices) <= 1:
-        configs.trainer.strategy = None
 
     trainer_config = {
         "accelerator": "cpu",
