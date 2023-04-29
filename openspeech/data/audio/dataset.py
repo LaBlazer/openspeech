@@ -89,7 +89,7 @@ class SpeechToTextDataset(Dataset):
         self.sample_rate = configs.audio.sample_rate
         self.num_mels = configs.audio.num_mels
         self.audio_min_duration = audio_min_duration
-        self.audio_max_duration = audio_min_duration
+        self.audio_max_duration = audio_max_duration
         self.del_silence = del_silence
         self.apply_spec_augment = apply_spec_augment
         self.apply_noise_augment = apply_noise_augment
@@ -217,8 +217,6 @@ class SpeechToTextDataset(Dataset):
             feature = self._parse_audio(audio_path, self.augments[idx])
             transcript = self._parse_transcript(self.transcripts[idx])
         
-        print(feature.shape)
-        print(transcript)
         return feature, transcript
 
     def __len__(self):
