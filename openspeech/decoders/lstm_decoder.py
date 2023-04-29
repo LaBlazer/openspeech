@@ -184,6 +184,9 @@ class LSTMDecoder(OpenspeechDecoder):
                     input_var=input_var,
                     hidden_states=hidden_states,
                 )
+                print(self.num_classes)
+                print(self.num_layers)
+                print(self.hidden_state_dim)
                 print(input_var.shape)
                 print(step_outputs.shape)
                 print(outputs[:, di, :].shape)
