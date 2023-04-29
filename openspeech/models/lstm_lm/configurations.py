@@ -50,6 +50,6 @@ class LSTMLanguageModelConfigs(OpenspeechDataclass):
     hidden_state_dim: int = field(default=512, metadata={"help": "The hidden state dimension of encoder."})
     dropout_p: float = field(default=0.3, metadata={"help": "The dropout probability of encoder."})
     rnn_type: str = field(default="lstm", metadata={"help": "Type of rnn cell (rnn, lstm, gru)"})
-    max_length: int = field(default=128, metadata={"help": "Max decoding length."})
+    max_length: int = field(default=256, metadata={"help": "Max decoding length."})
     teacher_forcing_ratio: float = field(default=1.0, metadata={"help": "The ratio of teacher forcing. "})
     optimizer: str = field(default="adam", metadata={"help": "Optimizer for training."})

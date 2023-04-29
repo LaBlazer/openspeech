@@ -51,5 +51,5 @@ class TransformerLanguageModelConfigs(OpenspeechDataclass):
     d_ff: int = field(default=1536, metadata={"help": "The dimenstion of feed forward network."})
     num_attention_heads: int = field(default=8, metadata={"help": "The number of attention heads."})
     dropout_p: float = field(default=0.3, metadata={"help": "The dropout probability of encoder."})
-    max_length: int = field(default=128, metadata={"help": "Max decoding length."})
+    max_length: int = field(default=256, metadata={"help": "Max decoding length."})
     optimizer: str = field(default="adam", metadata={"help": "Optimizer for training."})

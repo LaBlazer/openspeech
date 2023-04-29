@@ -94,7 +94,7 @@ class ContextNetLSTMConfigs(OpenspeechDataclass):
     num_attention_heads: int = field(default=8, metadata={"help": "The number of attention heads."})
     attention_dropout_p: float = field(default=0.1, metadata={"help": "The dropout probability of attention module."})
     decoder_dropout_p: float = field(default=0.1, metadata={"help": "The dropout probability of decoder."})
-    max_length: int = field(default=128, metadata={"help": "Max decoding length."})
+    max_length: int = field(default=256, metadata={"help": "Max decoding length."})
     teacher_forcing_ratio: float = field(default=1.0, metadata={"help": "The ratio of teacher forcing. "})
     rnn_type: str = field(default="lstm", metadata={"help": "Type of rnn cell (rnn, lstm, gru)"})
     decoder_attn_mechanism: str = field(default="loc", metadata={"help": "The attention mechanism for decoder."})
