@@ -257,10 +257,13 @@ def get_pl_trainer(
         )
     
     devices = configs.trainer.devices if configs.trainer.devices else [i for i in range(num_devices)]
+    
+    if len(devices) <= 1:
+        configs.trainer.strategy = None
 
     trainer_config = {
         "accelerator": "cpu",
-        "strategy": configs.trainer.strategy if len(devices) > 1 else None,
+        "strategy": configs.trainer.strategy,
         "replace_sampler_ddp": configs.trainer.replace_sampler_ddp,
         "accumulate_grad_batches": configs.trainer.accumulate_grad_batches,
         "check_val_every_n_epoch": configs.trainer.check_val_every_n_epoch,
