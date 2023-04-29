@@ -54,7 +54,7 @@ def _sanitize_text(text):
     text = WHITESPACE_REGEX.sub(" ", text)
     return text.strip()
 
-def read_transcripts(dataset_path: str, text_min_len: int = 4, text_max_len: int = 200, 
+def read_transcripts(dataset_path: str, text_min_len: int = 4, text_max_len: int = 300, 
                      audio_min_len: float = 0.0, audio_max_len: float = 20.0):
     """
     Returns:

@@ -32,7 +32,7 @@ from torch.utils.data import Dataset
 
 from openspeech.data import AUDIO_FEATURE_TRANSFORM_REGISTRY
 from openspeech.data.audio.augment import JoiningAugment, NoiseInjector, SpecAugment, TimeStretchAugment
-from openspeech.data.audio.load import load_audio
+from openspeech.data.audio.load import load_audio, get_audio_length
 
 logger = logging.getLogger(__name__)
 
@@ -75,6 +75,8 @@ class SpeechToTextDataset(Dataset):
         apply_noise_augment: bool = False,
         apply_time_stretch_augment: bool = False,
         apply_joining_augment: bool = False,
+        audio_min_duration: float = 0,
+        audio_max_duration: float = 50,
     ) -> None:
         super(SpeechToTextDataset, self).__init__()
         self.dataset_path = dataset_path
@@ -86,6 +88,8 @@ class SpeechToTextDataset(Dataset):
         self.eos_id = eos_id
         self.sample_rate = configs.audio.sample_rate
         self.num_mels = configs.audio.num_mels
+        self.audio_min_duration = audio_min_duration
+        self.audio_max_duration = audio_min_duration
         self.del_silence = del_silence
         self.apply_spec_augment = apply_spec_augment
         self.apply_noise_augment = apply_noise_augment
@@ -165,13 +169,15 @@ class SpeechToTextDataset(Dataset):
 
         if augment == self.AUDIO_JOINING:
             joining_signal = self._load_audio(self.audio_paths[joining_idx], sample_rate=self.sample_rate)
-            signal = self._joining_augment((signal, joining_signal))
+            signal = self._joining_augment([signal, joining_signal])
 
-        if augment == self.TIME_STRETCH:
+        elif augment == self.TIME_STRETCH:
             signal = self._time_stretch_augment(signal)
 
-        if augment == self.NOISE_AUGMENT:
+        elif augment == self.NOISE_AUGMENT:
             signal = self._noise_injector(signal)
+
+        signal = signal[: self.sample_rate * self.audio_max_duration]
 
         feature = self.transforms(signal)
 

@@ -92,7 +92,11 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
         r"""Generate manifest files."""
         self.logger.info(f"Generating manifest files to {manifest_file_path}")
         transcripts, skipped = read_transcripts(
-            dataset_path=self.configs.dataset.dataset_path
+            dataset_path=self.configs.dataset.dataset_path,
+            text_min_len=self.configs.dataset.text_min_len,
+            text_max_len=self.configs.dataset.text_max_len,
+            audio_min_len=self.configs.dataset.audio_min_len,
+            audio_max_len=self.configs.dataset.audio_max_len,
         )
 
         self.logger.info(f"Skipping {skipped} transcripts due to length constraints.")
@@ -182,6 +186,8 @@ class LightningSlovakSpeechDataModule(pl.LightningDataModule):
                 apply_time_stretch_augment=self.configs.augment.apply_time_stretch_augment if stage == "train" else False,
                 apply_joining_augment=self.configs.augment.apply_joining_augment if stage == "train" else False,
                 del_silence=self.configs.audio.del_silence if stage == "train" else False,
+                audio_min_duration=self.configs.dataset.audio_min_len,
+                audio_max_duration=self.configs.dataset.audio_max_len,
             )
 
     def train_dataloader(self) -> AudioDataLoader:

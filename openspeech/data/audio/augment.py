@@ -179,7 +179,7 @@ class TimeStretchAugment(object):
         self.max_rate = max_rate
 
     def __call__(self, signal: np.array):
-        return librosa.effects.time_stretch(signal, random.uniform(self.min_rate, self.max_rate))
+        return librosa.effects.time_stretch(signal, rate=random.uniform(self.min_rate, self.max_rate))
 
 
 class JoiningAugment(object):
