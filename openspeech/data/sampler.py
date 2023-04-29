@@ -113,12 +113,15 @@ class SmartBatchingDistributedSampler(DistributedSampler):
                  batch_size: int = 32, drop_last: bool = False, descending: bool = True) -> None:
         super(SmartBatchingDistributedSampler, self).__init__(data_source)
         
-        self.batch_size = batch_size
-        self.data_source = data_source
+        min_batch_size = batch_size // self.num_replicas
+        if batch_size % self.num_replicas != 0:
+            min_batch_size += 1
 
+        self.batch_size = min_batch_size * self.num_replicas
+        self.data_source = data_source
         self.random = random.Random(seed)
 
-        logging.info("Loading audio lengths...")
+        logging.info("[%d/%d] Using batch size of %d, loading audio lengths...", self.rank, self.num_replicas, self.batch_size)
 
         audio_lengths = {idx: self._get_audio_length(audio_path) for idx, audio_path in enumerate(data_source.audio_paths)}
         audio_indices = [x[0] for x in sorted(audio_lengths.items(), key=lambda x: x[1], reverse=descending)]

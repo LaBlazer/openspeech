@@ -78,12 +78,22 @@ class DatasetShuffler(pl.Callback):
             hasattr(dataloader.batch_sampler, 'shuffle') and \
             callable(dataloader.batch_sampler.shuffle):
             dataloader.batch_sampler.shuffle()
-
-    def on_train_epoch_end(self, trainer: pl.Trainer, pl_module):
+    
+    def _shuffle_dataloaders(self, trainer: pl.Trainer):
+        """Shuffle the dataset"""
         self._shuffle_dataloader(trainer.train_dataloader)
         for dl in trainer.val_dataloaders:
             self._shuffle_dataloader(dl)
 
+    def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+        # if we are on last batch
+        if trainer.is_last_batch:
+            self._shuffle_dataloaders(trainer)
+    
+    def on_train_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
+        # if we are on last batch
+        if trainer.is_last_batch:
+            self._shuffle_dataloaders(trainer)
 
 class GpuProfilerCallback(pl.Callback):
     def __init__(self, gpu_id=0):
