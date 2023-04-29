@@ -172,6 +172,8 @@ class LSTMDecoder(OpenspeechDecoder):
                     input_var=targets[:, di].unsqueeze(1),
                     hidden_states=hidden_states,
                 )
+                print(step_outputs.shape)
+                print(outputs[:, di, :].shape)
                 outputs[:, di, :] = step_outputs
 
         else:
