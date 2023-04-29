@@ -85,7 +85,7 @@ class DatasetShuffler(pl.Callback):
         for dl in trainer.val_dataloaders:
             self._shuffle_dataloader(dl)
 
-    def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx):
+    def on_validation_batch_end(self, trainer, pl_module, outputs, batch, batch_idx, dataloader_idx):
         # if we are on last batch
         if trainer.is_last_batch:
             self._shuffle_dataloaders(trainer)
