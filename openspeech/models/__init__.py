@@ -115,6 +115,14 @@ from .listen_attend_spell import (
     ListenAttendSpellWithMultiHeadConfigs,
     ListenAttendSpellWithMultiHeadModel,
 )
+from .lstm import (
+    LstmCEConfigs,
+    LstmCEModel,
+    LstmCTCConfigs,
+    LstmCTCModel,
+    LstmCEAttentionConfigs,
+    LstmCEAttentionModel,
+)
 from .lstm_lm import LSTMLanguageModel, LSTMLanguageModelConfigs
 from .quartznet import (
     QuartzNet5x5Configs,
@@ -217,4 +225,10 @@ __all__ = [
     "TransformerLanguageModelConfigs",
     "TransformerPTConfigs",
     "TransformerPTModel",
+    "LstmCEConfigs",
+    "LstmCEModel",
+    "LstmCTCConfigs",
+    "LstmCTCModel",
+    "LstmCEAttentionConfigs",
+    "LstmCEAttentionModel",
 ]

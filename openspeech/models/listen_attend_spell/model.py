@@ -204,7 +204,6 @@ class ListenAttendSpellWithMultiHeadModel(OpenspeechEncoderDecoderModel):
             num_heads=self.configs.model.num_attention_heads,
             dropout_p=self.configs.model.decoder_dropout_p,
             num_layers=self.configs.model.num_decoder_layers,
-            attn_mechanism=self.configs.model.decoder_attn_mechanism,
             rnn_type=self.configs.model.rnn_type,
         )
 

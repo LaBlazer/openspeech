@@ -96,10 +96,12 @@ class ConvolutionalLSTMEncoder(OpenspeechEncoder):
 
         if self.joint_ctc_attention:
             self.fc = nn.Sequential(
-                Transpose(shape=(1, 2)),
                 nn.Dropout(dropout_p),
                 Linear(hidden_state_dim << 1, num_classes, bias=False),
             )
+
+    def get_output_dim(self) -> int:
+        return self.hidden_state_dim << 1 if self.rnn.bidirectional else self.hidden_state_dim
 
     def forward(
         self,
@@ -131,7 +133,7 @@ class ConvolutionalLSTMEncoder(OpenspeechEncoder):
         #outputs, _ = nn.utils.rnn.pad_packed_sequence(outputs, batch_first=True)
 
         if self.joint_ctc_attention:
-            encoder_logits = self.fc(outputs.transpose(1, 2)).log_softmax(dim=2)
+            encoder_logits = self.fc(outputs).log_softmax(dim=2)
 
         if self.output_hidden_states:
             return hidden_states, encoder_logits, output_lengths
