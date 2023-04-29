@@ -103,6 +103,8 @@ class JointCTCCrossEntropyLoss(nn.Module):
         max_target_length = targets.size(1)
         max_logits_length = logits.size(1)
 
+        print(encoder_logits.shape, logits.shape, output_lengths.shape, targets.shape, target_lengths.shape)
+
         if max_logits_length > max_target_length:
             logits = logits[:, :max_target_length, :]
             cross_entropy_targets = targets.clone()
