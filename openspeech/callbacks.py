@@ -21,6 +21,7 @@
 import os
 
 import pytorch_lightning as pl
+from pytorch_lightning.loggers import WandbLogger
 
 
 class DatasetShuffler(pl.Callback):
@@ -74,7 +75,13 @@ class CheckpointMonitor(pl.Callback):
     "Prints checkpoint path when a checkpoint is saved."
 
     def on_save_checkpoint(self, trainer: pl.Trainer, pl_module, checkpoint):
-        trainer.logger.info(f"Saved checkpoint: {checkpoint}")
+        if trainer.checkpoint_callback:
+            print(f"Saved checkpoint to: {trainer.checkpoint_callback.best_model_path}")
+
+            if isinstance(trainer.logger, WandbLogger):
+                trainer.logger.log_text("best_model", columns=["path", "score"], 
+                                        data=[trainer.checkpoint_callback.best_model_path,
+                                              trainer.checkpoint_callback.best_model_score])
     
 
 class DatasetShuffler(pl.Callback):
