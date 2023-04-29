@@ -161,7 +161,7 @@ class LstmCEModel(OpenspeechEncoderDecoderModel):
         self.decoder = LSTMDecoder(
             num_classes=self.num_classes,
             max_length=self.configs.model.max_length,
-            hidden_state_dim=self.encoder.get_output_dim(),
+            hidden_state_dim=self.configs.model.hidden_state_dim,
             pad_id=self.tokenizer.pad_id,
             sos_id=self.tokenizer.sos_id,
             eos_id=self.tokenizer.eos_id,
