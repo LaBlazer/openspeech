@@ -168,7 +168,8 @@ class SpeechToTextDataset(Dataset):
             return torch.zeros(1000, self.num_mels)
 
         if augment == self.AUDIO_JOINING:
-            joining_signal = self._load_audio(self.audio_paths[joining_idx], sample_rate=self.sample_rate)
+            joining_path = os.path.join(self.dataset_path, self.audio_paths[joining_idx])
+            joining_signal = self._load_audio(joining_path, sample_rate=self.sample_rate)
             signal = self._joining_augment([signal, joining_signal])
 
         elif augment == self.TIME_STRETCH:
