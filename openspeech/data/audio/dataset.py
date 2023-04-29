@@ -121,8 +121,8 @@ class SpeechToTextDataset(Dataset):
 
         if self.apply_time_stretch_augment:
             self._time_stretch_augment = TimeStretchAugment(
-                min_rate=configs.time_stretch_min_rate,
-                max_rate=configs.time_stretch_max_rate,
+                min_rate=configs.augment.time_stretch_min_rate,
+                max_rate=configs.augment.time_stretch_max_rate,
             )
             for idx in range(self.dataset_size):
                 self.audio_paths.append(self.audio_paths[idx])
