@@ -107,7 +107,6 @@ class ConvolutionalTransformerEncoder(OpenspeechEncoder):
 
         if self.joint_ctc_attention:
             self.fc = nn.Sequential(
-                Transpose(shape=(1, 2)),
                 nn.Dropout(dropout_p),
                 Linear(d_model, num_classes, bias=False),
             )
@@ -148,6 +147,6 @@ class ConvolutionalTransformerEncoder(OpenspeechEncoder):
             outputs = layer(outputs, self_attn_mask)
 
         if self.joint_ctc_attention:
-            encoder_logits = self.fc(outputs.transpose(1, 2)).log_softmax(dim=-1)
+            encoder_logits = self.fc(outputs).log_softmax(dim=-1)
 
         return outputs, encoder_logits, output_lengths
