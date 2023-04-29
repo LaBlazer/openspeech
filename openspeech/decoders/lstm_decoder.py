@@ -126,8 +126,6 @@ class LSTMDecoder(OpenspeechDecoder):
 
         outputs, hidden_states = self.rnn(embedded, hidden_states)
 
-        print(outputs.size(), hidden_states[0].size(), hidden_states[1].size())
-
         step_outputs = self.fc(outputs.view(-1, self.hidden_state_dim)).log_softmax(dim=-1)
         step_outputs = step_outputs.view(batch_size, output_lengths, -1).squeeze(1)
 
@@ -163,29 +161,21 @@ class LSTMDecoder(OpenspeechDecoder):
         if use_teacher_forcing:
             targets = targets[targets != self.eos_id].view(batch_size, -1)
 
-            for di in range(max_length + 1):
+            for di in range(max_length):
                 step_outputs, hidden_states = self.forward_step(
                     input_var=targets[:, di].unsqueeze(1),
                     hidden_states=hidden_states,
                 )
-                print(step_outputs.shape)
-                print(outputs[:, di, :].shape)
                 outputs[:, di, :] = step_outputs
 
         else:
             input_var = targets[:, 0].unsqueeze(1)
 
-            for di in range(max_length + 1):
+            for di in range(max_length):
                 step_outputs, hidden_states = self.forward_step(
                     input_var=input_var,
                     hidden_states=hidden_states,
                 )
-                print(self.num_classes)
-                print(self.num_layers)
-                print(self.hidden_state_dim)
-                print(input_var.shape)
-                print(step_outputs.shape)
-                print(outputs[:, di, :].shape)
                 outputs[:, di, :] = step_outputs
                 input_var = step_outputs.argmax(dim=-1, keepdim=True)
 
