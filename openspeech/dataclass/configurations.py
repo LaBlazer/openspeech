@@ -124,7 +124,7 @@ class SlovakSpeechConfigs(BaseDatasetConfigs):
         default=0.1, metadata={"help": "Minimum length of audio in seconds"}
     )
     audio_max_length: float = field(
-        default=15, metadata={"help": "Maximum length of audio in seconds"}
+        default=20, metadata={"help": "Maximum length of audio in seconds"}
     )
 
 @dataclass
