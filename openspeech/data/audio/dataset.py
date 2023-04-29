@@ -121,7 +121,7 @@ class SpeechToTextDataset(Dataset):
             for idx in range(self.dataset_size):
                 self.audio_paths.append(self.audio_paths[idx])
                 self.transcripts.append(self.transcripts[idx])
-                self.augments.append(self.NONE_AUGMENT)
+                self.augments.append(self.NOISE_AUGMENT)
 
         if self.apply_time_stretch_augment:
             self._time_stretch_augment = TimeStretchAugment(
@@ -192,7 +192,7 @@ class SpeechToTextDataset(Dataset):
 
         return feature
 
-    def _parse_transcript(self, transcript: str) -> list:
+    def _parse_transcript(self, transcript: str) -> list[int]:
         """
         Parses transcript
         Args:
@@ -200,15 +200,9 @@ class SpeechToTextDataset(Dataset):
         Returns
             transcript (list): transcript that added <sos> and <eos> tokens
         """
-        tokens = transcript.split(" ")
-        transcript = list()
+        tokens = [int(t) for t in transcript.split(" ")]
 
-        transcript.append(int(self.sos_id))
-        for token in tokens:
-            transcript.append(int(token))
-        transcript.append(int(self.eos_id))
-
-        return transcript
+        return [self.sos_id] + tokens + [self.eos_id]
 
     def __getitem__(self, idx):
         """Provides paif of audio & transcript"""
@@ -223,7 +217,7 @@ class SpeechToTextDataset(Dataset):
             feature = self._parse_audio(audio_path, self.augments[idx])
             transcript = self._parse_transcript(self.transcripts[idx])
         
-        print(feature)
+        print(feature.shape)
         print(transcript)
         return feature, transcript
 
