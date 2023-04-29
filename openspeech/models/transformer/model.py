@@ -222,7 +222,7 @@ class TransformerWithCTCModel(OpenspeechCTCModel):
 
     def __init__(self, configs: DictConfig, tokenizer: Tokenizer) -> None:
         super(TransformerWithCTCModel, self).__init__(configs, tokenizer)
-        self.fc = Linear(self.configs.model.encoder_dim, self.num_classes, bias=True),
+        self.fc = Linear(self.configs.model.encoder_dim, self.num_classes, bias=False),
 
         self.encoder = ConvolutionalTransformerEncoder(
             input_dim=self.configs.audio.num_mels,

@@ -67,12 +67,7 @@ class LstmCTCModel(OpenspeechCTCModel):
             conv_activation=self.configs.model.activation,
             output_hidden_states=False
         )
-        decoder_hidden_state_dim = (
-            self.configs.model.hidden_state_dim << 1
-            if self.configs.model.encoder_bidirectional
-            else self.configs.model.hidden_state_dim
-        )
-        self.fc = Linear(decoder_hidden_state_dim, self.num_classes, bias=False)
+        self.fc = Linear(self.encoder.get_output_dim(), self.num_classes, bias=False)
 
     def training_step(self, batch: tuple, batch_idx: int) -> OrderedDict:
         r"""
