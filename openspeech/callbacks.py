@@ -69,6 +69,14 @@ class CheckpointEveryNSteps(pl.Callback):
             ckpt_path = os.path.join(trainer.checkpoint_callback.dirpath, filename)
             trainer.save_checkpoint(ckpt_path)
 
+
+class CheckpointMonitor(pl.Callback):
+    "Prints checkpoint path when a checkpoint is saved."
+
+    def on_save_checkpoint(self, trainer: pl.Trainer, pl_module, checkpoint):
+        trainer.logger.info(f"Saved checkpoint: {checkpoint}")
+    
+
 class DatasetShuffler(pl.Callback):
     """Shuffle the dataset after each epoch"""
 

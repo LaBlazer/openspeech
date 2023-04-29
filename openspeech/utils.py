@@ -30,7 +30,7 @@ import torch
 from omegaconf import DictConfig, OmegaConf
 from pytorch_lightning.callbacks import LearningRateMonitor, EarlyStopping, ModelCheckpoint
 
-from .callbacks import CheckpointEveryNSteps, DatasetShuffler
+from .callbacks import CheckpointEveryNSteps, DatasetShuffler, CheckpointMonitor
 
 PYTORCH_IMPORT_ERROR = """
 Openspeech requires the PyTorch library but it was not found in your environment. Checkout the instructions on the
@@ -237,6 +237,7 @@ def get_pl_trainer(
     
     callbacks = [
         LearningRateMonitor(logging_interval="step"), 
+        CheckpointMonitor(),
         DatasetShuffler()
     ]
 

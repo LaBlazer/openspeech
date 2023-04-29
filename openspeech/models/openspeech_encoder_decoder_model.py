@@ -59,6 +59,9 @@ class OpenspeechEncoderDecoderModel(OpenspeechModel):
         self.encoder = None
         self.decoder = None
 
+        assert configs.criterion.criterion_name in ("joint_ctc_cross_entropy", "cross_entropy", "label_smoothed_cross_entropy"), \
+            "Unsupported criterion: {configs.criterion.criterion_name}"
+
     def set_beam_decoder(self, beam_size: int = 3):
         raise NotImplementedError
 

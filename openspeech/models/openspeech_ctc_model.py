@@ -52,10 +52,7 @@ class OpenspeechCTCModel(OpenspeechModel):
         self.encoder = None
         self.decoder = None
 
-        for stage in ['val', 'test']:
-            self.define_metric(f"{stage}_wer", summary="best", goal="minimize")
-            self.define_metric(f"{stage}_cer", summary="best", goal="minimize")
-            self.define_metric(f"{stage}_loss", summary="best", goal="minimize")
+        assert configs.criterion.criterion_name == "ctc", "Criterion should be ctc in ctc model."
 
     def set_beam_decoder(self, beam_size: int = 3):
         """Setting beam search decoder"""
