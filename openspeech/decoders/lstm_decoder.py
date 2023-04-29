@@ -193,7 +193,7 @@ class LSTMDecoder(OpenspeechDecoder):
         hidden_states: torch.Tensor = None,
         teacher_forcing_ratio: float = 1.0,
     ) -> Tuple[torch.Tensor, int, int]:
-        batch_size = hidden_states.size(0)
+        batch_size = hidden_states.size(1)
 
         if targets is None:  # inference
             max_length = self.max_length
