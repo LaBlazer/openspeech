@@ -131,6 +131,7 @@ class LSTMDecoder(OpenspeechDecoder):
 
         outputs, hidden_states = self.rnn(embedded, hidden_states)
 
+        print(outputs.size(), hidden_states.size())
 
         step_outputs = self.fc(outputs.view(-1, self.hidden_state_dim << 1)).log_softmax(dim=-1)
         step_outputs = step_outputs.view(batch_size, output_lengths, -1).squeeze(1)
