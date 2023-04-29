@@ -166,7 +166,7 @@ class LstmCEModel(OpenspeechEncoderDecoderModel):
             sos_id=self.tokenizer.sos_id,
             eos_id=self.tokenizer.eos_id,
             dropout_p=self.configs.model.decoder_dropout_p,
-            num_layers=self.configs.model.num_decoder_layers,
+            num_layers=self.configs.model.num_encoder_layers,
             rnn_type=self.configs.model.rnn_type,
         )
 
