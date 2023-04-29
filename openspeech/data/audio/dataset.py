@@ -111,7 +111,7 @@ class SpeechToTextDataset(Dataset):
 
             self._noise_injector = NoiseInjector(
                 noise_dataset_dir=configs.augment.noise_dataset_dir,
-                sample_rate=configs.augment.noise_sample_rate,
+                sample_rate=self.sample_rate,
                 noise_level=configs.augment.noise_level,
             )
             for idx in range(self.dataset_size):
