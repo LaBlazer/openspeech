@@ -164,10 +164,10 @@ class AugmentConfigs(OpenspeechDataclass):
     )
     freq_mask_num: int = field(default=2, metadata={"help": "How many freq-masked area to make"})
     time_mask_num: int = field(default=4, metadata={"help": "How many time-masked area to make"})
-    noise_dataset_dir: str = field(default="None", metadata={"help": "How many time-masked area to make"})
+    noise_dataset_dir: Optional[str] = field(default=None, metadata={"help": "Path of noise dataset"})
     noise_level: float = field(default=0.7, metadata={"help": "Noise adjustment level"})
-    time_stretch_min_rate: float = field(default=0.7, metadata={"help": "Minimum rate of audio time stretch"})
-    time_stretch_max_rate: float = field(default=1.4, metadata={"help": "Maximum rate of audio time stretch"})
+    time_stretch_min_rate: float = field(default=0.8, metadata={"help": "Minimum rate of audio time stretch"})
+    time_stretch_max_rate: float = field(default=1.2, metadata={"help": "Maximum rate of audio time stretch"})
 
 
 @dataclass

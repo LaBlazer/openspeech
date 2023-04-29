@@ -106,7 +106,7 @@ class SpeechToTextDataset(Dataset):
                 self.augments.append(self.SPEC_AUGMENT)
 
         if self.apply_noise_augment:
-            if eval(configs.augment.noise_dataset_dir) is None:
+            if not configs.augment.noise_dataset_dir:
                 raise ValueError("`noise_dataset_dir` should be contain audio files.")
 
             self._noise_injector = NoiseInjector(
