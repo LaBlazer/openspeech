@@ -80,8 +80,8 @@ class CheckpointMonitor(pl.Callback):
 
             if isinstance(trainer.logger, WandbLogger):
                 trainer.logger.log_text("best_model", columns=["path", "score"], 
-                                        data=[[trainer.checkpoint_callback.best_model_path],
-                                              [trainer.checkpoint_callback.best_model_score]])
+                                        data=[[trainer.checkpoint_callback.best_model_path, 
+                                               trainer.checkpoint_callback.best_model_score]])
     
 
 class DatasetShuffler(pl.Callback):
