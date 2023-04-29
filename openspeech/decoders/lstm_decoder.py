@@ -156,15 +156,15 @@ class LSTMDecoder(OpenspeechDecoder):
         hidden_states = encoder_outputs
 
         targets, batch_size, max_length = self.validate_args(targets, encoder_outputs, teacher_forcing_ratio)
-        use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
+        use_teacher_forcing = random.random() < teacher_forcing_ratio
         outputs = torch.zeros(batch_size, max_length, self.num_classes, device=encoder_outputs.device)
 
         if use_teacher_forcing:
             targets = targets[targets != self.eos_id].view(batch_size, -1)
 
-            for di in range(1, max_length):
+            for di in range(max_length + 1):
                 step_outputs, hidden_states = self.forward_step(
-                    input_var=targets[:, di - 1].unsqueeze(1),
+                    input_var=targets[:, di].unsqueeze(1),
                     hidden_states=hidden_states,
                 )
                 outputs[:, di, :] = step_outputs

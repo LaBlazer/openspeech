@@ -182,7 +182,7 @@ class LSTMAttentionDecoder(OpenspeechDecoder):
         hidden_states, attn = None, None
 
         targets, batch_size, max_length = self.validate_args(targets, encoder_outputs, teacher_forcing_ratio)
-        use_teacher_forcing = True if random.random() < teacher_forcing_ratio else False
+        use_teacher_forcing = random.random() < teacher_forcing_ratio
 
         if use_teacher_forcing:
             targets = targets[targets != self.eos_id].view(batch_size, -1)

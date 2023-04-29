@@ -72,11 +72,13 @@ class ConvolutionalLSTMEncoder(OpenspeechEncoder):
         extractor: str = "vgg",
         conv_activation: str = "hardtanh",
         joint_ctc_attention: bool = False,
+        output_hidden_states: bool = False,
     ) -> None:
         super(ConvolutionalLSTMEncoder, self).__init__()
         extractor = self.supported_extractors[extractor.lower()]
         self.conv = extractor(input_dim=input_dim, activation=conv_activation)
         self.conv_output_dim = self.conv.get_output_dim()
+        self.output_hidden_states = output_hidden_states
 
         self.num_classes = num_classes
         self.joint_ctc_attention = joint_ctc_attention
@@ -124,12 +126,14 @@ class ConvolutionalLSTMEncoder(OpenspeechEncoder):
 
         conv_outputs, output_lengths = self.conv(inputs, input_lengths)
 
-        conv_outputs = nn.utils.rnn.pack_padded_sequence(conv_outputs.transpose(0, 1), output_lengths.cpu())
+        #conv_outputs = nn.utils.rnn.pack_padded_sequence(conv_outputs, output_lengths.cpu(), batch_first=True)
         outputs, hidden_states = self.rnn(conv_outputs)
-        outputs, _ = nn.utils.rnn.pad_packed_sequence(outputs)
-        outputs = outputs.transpose(0, 1)
+        #outputs, _ = nn.utils.rnn.pad_packed_sequence(outputs, batch_first=True)
 
         if self.joint_ctc_attention:
             encoder_logits = self.fc(outputs.transpose(1, 2)).log_softmax(dim=2)
 
+        if self.output_hidden_states:
+            return hidden_states, encoder_logits, output_lengths
+        
         return outputs, encoder_logits, output_lengths

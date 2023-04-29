@@ -176,7 +176,7 @@ class ListenAttendSpellWithMultiHeadModel(OpenspeechEncoderDecoderModel):
     def __init__(self, configs: DictConfig, tokenizer: Tokenizer) -> None:
         super(ListenAttendSpellWithMultiHeadModel, self).__init__(configs, tokenizer)
 
-        self.encoder = LSTMEncoder(
+        self.encoder = self.encoder = ConvolutionalLSTMEncoder(
             input_dim=self.configs.audio.num_mels,
             num_layers=self.configs.model.num_encoder_layers,
             num_classes=self.num_classes,
@@ -185,13 +185,15 @@ class ListenAttendSpellWithMultiHeadModel(OpenspeechEncoderDecoderModel):
             bidirectional=self.configs.model.encoder_bidirectional,
             rnn_type=self.configs.model.rnn_type,
             joint_ctc_attention=self.configs.model.joint_ctc_attention,
+            extractor=self.configs.model.extractor,
+            conv_activation=self.configs.model.activation,
         )
         decoder_hidden_state_dim = (
             self.configs.model.hidden_state_dim << 1
             if self.configs.model.encoder_bidirectional
             else self.configs.model.hidden_state_dim
         )
-        self.decoder = LSTMAttentionDecoder(
+        self.decoder = LSTMDecoder(
             num_classes=self.num_classes,
             max_length=self.configs.model.max_length,
             hidden_state_dim=decoder_hidden_state_dim,
@@ -305,6 +307,8 @@ class DeepCNNWithJointCTCListenAttendSpellModel(OpenspeechEncoderDecoderModel):
             bidirectional=self.configs.model.encoder_bidirectional,
             rnn_type=self.configs.model.rnn_type,
             joint_ctc_attention=self.configs.model.joint_ctc_attention,
+            extractor=self.configs.model.extractor,
+            conv_activation=self.configs.model.activation,
         )
         decoder_hidden_state_dim = (
             self.configs.model.hidden_state_dim << 1
