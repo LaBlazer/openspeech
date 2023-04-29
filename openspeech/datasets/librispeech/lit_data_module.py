@@ -181,7 +181,7 @@ class LightningLibriSpeechDataModule(pl.LightningDataModule):
                 dataset_path=os.path.join(self.configs.dataset.dataset_path, "LibriSpeech"),
                 audio_paths=audio_paths[stage],
                 transcripts=transcripts[stage],
-                apply_spec_augment=self.configs.audio.apply_spec_augment if stage == "train" else False,
+                apply_spec_augment=self.configs.augment.apply_spec_augment if stage == "train" else False,
                 del_silence=self.configs.audio.del_silence if stage == "train" else False,
             )
 
