@@ -255,10 +255,12 @@ def get_pl_trainer(
             ModelCheckpoint(monitor=configs.trainer.early_stopping_monitor, 
                             save_top_k=1, mode="min")
         )
+    
+    devices = configs.trainer.devices if configs.trainer.devices else [i for i in range(num_devices)]
 
     trainer_config = {
         "accelerator": "cpu",
-        "strategy": configs.trainer.strategy,
+        "strategy": configs.trainer.strategy if len(devices) > 1 else None,
         "replace_sampler_ddp": configs.trainer.replace_sampler_ddp,
         "accumulate_grad_batches": configs.trainer.accumulate_grad_batches,
         "check_val_every_n_epoch": configs.trainer.check_val_every_n_epoch,
@@ -270,8 +272,6 @@ def get_pl_trainer(
         "profiler": configs.trainer.profiler,
         "callbacks": callbacks,
     }
-
-    devices = configs.trainer.devices if configs.trainer.devices else [i for i in range(num_devices)]
 
     if configs.trainer.name == "cpu":
         # use default configuration
