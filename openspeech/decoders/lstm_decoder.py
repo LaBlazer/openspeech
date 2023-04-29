@@ -114,12 +114,7 @@ class LSTMDecoder(OpenspeechDecoder):
         batch_size, output_lengths = input_var.size(0), input_var.size(1)
 
         embedded = self.embedding(input_var)
-        print(embedded.size())
-        print(hidden_states.size())
         embedded = self.input_dropout(embedded)
-
-        print(embedded.size())
-        print(hidden_states.size())
 
         if self.training:
             self.rnn.flatten_parameters()
@@ -155,11 +150,9 @@ class LSTMDecoder(OpenspeechDecoder):
         """
         hidden_states = encoder_outputs
 
-        print(hidden_states)
-
-        targets, batch_size, max_length = self.validate_args(targets, encoder_outputs, teacher_forcing_ratio)
+        targets, batch_size, max_length = self.validate_args(targets, hidden_states, teacher_forcing_ratio)
         use_teacher_forcing = random.random() < teacher_forcing_ratio
-        outputs = torch.zeros(batch_size, max_length, self.num_classes, device=encoder_outputs.device)
+        outputs = torch.zeros(batch_size, max_length, self.num_classes, device=hidden_states[0].device)
 
         if use_teacher_forcing:
             targets = targets[targets != self.eos_id].view(batch_size, -1)
@@ -187,15 +180,14 @@ class LSTMDecoder(OpenspeechDecoder):
     def validate_args(
         self,
         targets: Optional[Any] = None,
-        encoder_outputs: torch.Tensor = None,
+        hidden_states: torch.Tensor = None,
         teacher_forcing_ratio: float = 1.0,
     ) -> Tuple[torch.Tensor, int, int]:
-        assert encoder_outputs is not None
-        batch_size = encoder_outputs.size(0)
+        batch_size = hidden_states[0].size(0)
 
         if targets is None:  # inference
             max_length = self.max_length
-            targets = torch.full((batch_size, 1), self.sos_id, dtype=torch.long, device=encoder_outputs.device)
+            targets = torch.full((batch_size, 1), self.sos_id, dtype=torch.long, device=hidden_states[0].device)
 
             if teacher_forcing_ratio > 0:
                 raise ValueError("Teacher forcing has to be disabled (set 0) when no targets is provided.")
