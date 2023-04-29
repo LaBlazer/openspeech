@@ -103,6 +103,7 @@ class NoiseInjector(object):
         noise_dataset_dir: str,
         sample_rate: int = 16000,
         noise_level: float = 0.7,
+        seed: int = 777,
     ) -> None:
         if not os.path.exists(noise_dataset_dir):
             logger.info("Directory doesn`t exist: {0}".format(noise_dataset_dir))
@@ -112,6 +113,7 @@ class NoiseInjector(object):
 
         self.sample_rate = sample_rate
         self.noise_level = noise_level
+        self.rnd = random.Random(seed)
         self._load_audio = load_audio
         self.audio_paths = self.create_audio_paths(noise_dataset_dir)
         self.dataset = self.create_noiseset(noise_dataset_dir)
@@ -119,16 +121,15 @@ class NoiseInjector(object):
         logger.info("Create Noise injector complete !!")
 
     def __call__(self, signal):
-        noise = np.random.choice(self.dataset)
-        noise_level = np.random.uniform(0, self.noise_level)
+        noise = self.rnd.choice(self.dataset)
+        noise_level = self.rnd.uniform(0, self.noise_level)
 
         signal_length = len(signal)
         noise_length = len(noise)
 
         if signal_length >= noise_length:
-            noise_start = int(np.random.rand() * (signal_length - noise_length))
-            noise_end = int(noise_start + noise_length)
-            signal[noise_start:noise_end] += noise * noise_level
+            noise_start = self.rnd.randint(0, signal_length - noise_length)
+            signal[noise_start:noise_start + noise_length] += noise * noise_level
 
         else:
             signal += noise[:signal_length] * noise_level

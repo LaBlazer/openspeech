@@ -217,6 +217,8 @@ class SpeechToTextDataset(Dataset):
             feature = self._parse_audio(audio_path, self.augments[idx])
             transcript = self._parse_transcript(self.transcripts[idx])
         
+        print(len(transcript), feature.shape)
+
         return feature, transcript
 
     def __len__(self):
