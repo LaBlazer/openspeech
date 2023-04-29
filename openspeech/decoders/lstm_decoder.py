@@ -101,12 +101,7 @@ class LSTMDecoder(OpenspeechDecoder):
             bidirectional=False,
         )
 
-        self.fc = nn.Sequential(
-            Linear(hidden_state_dim << 1, hidden_state_dim),
-            nn.Tanh(),
-            View(shape=(-1, self.hidden_state_dim), contiguous=True),
-            Linear(hidden_state_dim, num_classes),
-        )
+        self.fc = Linear(hidden_state_dim, num_classes)
 
     def _cat_directions(self, h):
         """ If the encoder is bidirectional, do the following transformation.
@@ -133,7 +128,7 @@ class LSTMDecoder(OpenspeechDecoder):
 
         print(outputs.size(), hidden_states[0].size(), hidden_states[1].size())
 
-        step_outputs = self.fc(outputs.view(-1, self.hidden_state_dim << 1)).log_softmax(dim=-1)
+        step_outputs = self.fc(outputs.view(-1, self.hidden_state_dim)).log_softmax(dim=-1)
         step_outputs = step_outputs.view(batch_size, output_lengths, -1).squeeze(1)
 
         return step_outputs, hidden_states
