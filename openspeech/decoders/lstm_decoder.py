@@ -179,11 +179,14 @@ class LSTMDecoder(OpenspeechDecoder):
         else:
             input_var = targets[:, 0].unsqueeze(1)
 
-            for di in range(1, max_length):
+            for di in range(max_length + 1):
                 step_outputs, hidden_states = self.forward_step(
                     input_var=input_var,
                     hidden_states=hidden_states,
                 )
+                print(input_var.shape)
+                print(step_outputs.shape)
+                print(outputs[:, di, :].shape)
                 outputs[:, di, :] = step_outputs
                 input_var = step_outputs.argmax(dim=-1, keepdim=True)
 
