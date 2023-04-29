@@ -77,8 +77,10 @@ class LSTMDecoder(OpenspeechDecoder):
         num_layers: int = 2,
         rnn_type: str = "lstm",
         dropout_p: float = 0.3,
+        bidirectional_encoder: bool = True,
     ) -> None:
         super(LSTMDecoder, self).__init__()
+        self.bidirectional_encoder = bidirectional_encoder
         self.hidden_state_dim = hidden_state_dim
         self.num_classes = num_classes
         self.num_layers = num_layers
@@ -105,6 +107,14 @@ class LSTMDecoder(OpenspeechDecoder):
             View(shape=(-1, self.hidden_state_dim), contiguous=True),
             Linear(hidden_state_dim, num_classes),
         )
+
+    def _cat_directions(self, h):
+        """ If the encoder is bidirectional, do the following transformation.
+            (#directions * #layers, #batch, hidden_size) -> (#layers, #batch, #directions * hidden_size)
+        """
+        if self.bidirectional_encoder:
+            h = torch.cat([h[0:h.size(0):2], h[1:h.size(0):2]], 2)
+        return h
 
     def forward_step(
         self,
@@ -148,9 +158,9 @@ class LSTMDecoder(OpenspeechDecoder):
         Returns:
             * logits (torch.FloatTensor): Log probability of model predictions.
         """
-        hidden_states = encoder_outputs
+        hidden_states = tuple(self._cat_directions(encoder_outputs[0]), self._cat_directions(encoder_outputs[1]))
 
-        targets, batch_size, max_length = self.validate_args(targets, hidden_states, teacher_forcing_ratio)
+        targets, batch_size, max_length = self.validate_args(targets, hidden_states[0], teacher_forcing_ratio)
         use_teacher_forcing = random.random() < teacher_forcing_ratio
         outputs = torch.zeros(batch_size, max_length, self.num_classes, device=hidden_states[0].device)
 
@@ -183,11 +193,11 @@ class LSTMDecoder(OpenspeechDecoder):
         hidden_states: torch.Tensor = None,
         teacher_forcing_ratio: float = 1.0,
     ) -> Tuple[torch.Tensor, int, int]:
-        batch_size = hidden_states[0].size(0)
+        batch_size = hidden_states.size(0)
 
         if targets is None:  # inference
             max_length = self.max_length
-            targets = torch.full((batch_size, 1), self.sos_id, dtype=torch.long, device=hidden_states[0].device)
+            targets = torch.full((batch_size, 1), self.sos_id, dtype=torch.long, device=hidden_states.device)
 
             if teacher_forcing_ratio > 0:
                 raise ValueError("Teacher forcing has to be disabled (set 0) when no targets is provided.")
