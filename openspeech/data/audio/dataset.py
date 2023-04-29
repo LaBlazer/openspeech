@@ -177,7 +177,7 @@ class SpeechToTextDataset(Dataset):
         elif augment == self.NOISE_AUGMENT:
             signal = self._noise_injector(signal)
 
-        signal = signal[: self.sample_rate * self.audio_max_duration]
+        signal = signal[: int(self.sample_rate * self.audio_max_duration)]
 
         feature = self.transforms(signal)
 

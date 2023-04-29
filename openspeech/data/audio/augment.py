@@ -23,6 +23,7 @@
 import logging
 import os
 import random
+from typing import List
 
 import librosa
 import numpy as np
@@ -196,5 +197,5 @@ class JoiningAugment(object):
     def __init__(self):
         super(JoiningAugment, self).__init__()
 
-    def __call__(self, signals: tuple):
-        return np.concatenate([signal for signal in signals])
+    def __call__(self, signals: List[List[float]]):
+        return np.concatenate(signals)
