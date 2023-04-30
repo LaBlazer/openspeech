@@ -64,9 +64,9 @@ def _collate_fn(batch, pad_id: int = 0):
 
     targets = torch.full((batch_size, max_target_size), fill_value=pad_id, dtype=torch.long)
 
-    for x, s in enumerate(batch_size):
+    for x, s in enumerate(batch):
         tensor, target = s
-        
+
         seqs[x].narrow(0, 0, tensor.size(0)).copy_(tensor)
         targets[x].narrow(0, 0, len(target)).copy_(torch.LongTensor(target))
 
