@@ -76,8 +76,7 @@ class OpenspeechEncoderDecoderModel(OpenspeechModel):
     ) -> OrderedDict:
         cross_entropy_loss, ctc_loss = None, None
 
-        targets = targets[:, 1:self.max_length + 1]
-        target_lengths = clamp(target_lengths, max=self.max_length)
+        targets = targets[:, 1:]
 
         if get_class_name(self.criterion) == "JointCTCCrossEntropyLoss":
             loss, ctc_loss, cross_entropy_loss = self.criterion(

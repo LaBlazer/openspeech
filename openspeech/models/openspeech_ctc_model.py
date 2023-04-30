@@ -73,9 +73,7 @@ class OpenspeechCTCModel(OpenspeechModel):
         target_lengths: torch.IntTensor,
     ) -> OrderedDict:
         
-        targets = targets[:, 1:self.max_length + 1]
-        target_lengths = torch.clamp(target_lengths, max=self.max_length)
-
+        targets = targets[:, 1:]
         loss = self.criterion(
             log_probs=logits.transpose(0, 1),
             targets=targets,
