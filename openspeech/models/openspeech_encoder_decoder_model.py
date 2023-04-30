@@ -24,7 +24,7 @@ from collections import OrderedDict
 from typing import Dict
 
 from omegaconf import DictConfig
-from torch import Tensor
+from torch import Tensor, clamp
 
 from openspeech.models import OpenspeechModel
 from openspeech.tokenizers.tokenizer import Tokenizer
@@ -77,6 +77,7 @@ class OpenspeechEncoderDecoderModel(OpenspeechModel):
         cross_entropy_loss, ctc_loss = None, None
 
         targets = targets[:, 1:self.max_length + 1]
+        target_lengths = clamp(target_lengths, max=self.max_length)
 
         if get_class_name(self.criterion) == "JointCTCCrossEntropyLoss":
             loss, ctc_loss, cross_entropy_loss = self.criterion(
