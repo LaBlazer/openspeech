@@ -209,7 +209,7 @@ class SpeechToTextDataset(Dataset):
         audio_path = os.path.join(self.dataset_path, self.audio_paths[idx])
 
         if self.augments[idx] == self.AUDIO_JOINING:
-            joining_idx = random.randint(0, self.total_size)
+            joining_idx = random.randint(0, self.total_size - 1)
             feature = self._parse_audio(audio_path, self.augments[idx], joining_idx)
             transcript = self._parse_transcript(f"{self.transcripts[idx]} {self.transcripts[joining_idx]}")
 
