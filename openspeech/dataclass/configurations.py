@@ -139,7 +139,7 @@ class LMConfigs(BaseDatasetConfigs):
 @dataclass
 class AugmentConfigs(OpenspeechDataclass):
     apply_spec_augment: bool = field(
-        default=False, metadata={"help": "Flag indication whether to apply spec augment or not"}
+        default=True, metadata={"help": "Flag indication whether to apply spec augment or not"}
     )
     apply_noise_augment: bool = field(
         default=False,
