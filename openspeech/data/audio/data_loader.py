@@ -49,10 +49,7 @@ def _collate_fn(batch, pad_id: int = 0):
         return len(p[1])
 
     # sort by sequence length for rnn.pack_padded_sequence()
-    batch = sorted(batch, key=lambda sample: sample[0].size(0), reverse=True)
-
-    seq_lengths = [len(s[0]) for s in batch]
-    target_lengths = [len(s[1]) - 1 for s in batch]
+    #batch = sorted(batch, key=lambda sample: sample[0].size(0), reverse=True)
 
     max_seq_sample = max(batch, key=seq_length_)[0]
     max_target_sample = max(batch, key=target_length_)[1]
@@ -65,20 +62,16 @@ def _collate_fn(batch, pad_id: int = 0):
 
     seqs = torch.zeros(batch_size, max_seq_size, feat_size)
 
-    targets = torch.zeros(batch_size, max_target_size).to(torch.long)
-    targets.fill_(pad_id)
+    targets = torch.full((batch_size, max_target_size), fill_value=pad_id, dtype=torch.long)
 
-    for x in range(batch_size):
-        sample = batch[x]
-        tensor = sample[0]
-        target = sample[1]
-        seq_length = tensor.size(0)
-
-        seqs[x].narrow(0, 0, seq_length).copy_(tensor)
+    for x, s in enumerate(batch_size):
+        tensor, target = s
+        
+        seqs[x].narrow(0, 0, tensor.size(0)).copy_(tensor)
         targets[x].narrow(0, 0, len(target)).copy_(torch.LongTensor(target))
 
-    seq_lengths = torch.IntTensor(seq_lengths)
-    target_lengths = torch.IntTensor(target_lengths)
+    seq_lengths = torch.IntTensor([len(s[0]) for s in batch])
+    target_lengths = torch.IntTensor([len(s[1]) - 1 for s in batch])
 
     return seqs, targets, seq_lengths, target_lengths
 
