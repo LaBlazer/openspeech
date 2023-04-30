@@ -246,10 +246,6 @@ def get_pl_trainer(
         DatasetShuffler()
     ]
 
-    if configs.trainer.save_checkpoint_n_steps and configs.trainer.save_checkpoint_n_steps > 0:
-        callbacks.append(
-            CheckpointEveryNSteps(configs.trainer.save_checkpoint_n_steps)
-        )
     
     if configs.trainer.early_stopping_patience and configs.trainer.early_stopping_patience > 0:
         callbacks.append(
@@ -259,6 +255,11 @@ def get_pl_trainer(
         callbacks.append(
             ModelCheckpoint(monitor=configs.trainer.early_stopping_monitor, 
                             save_top_k=1, mode="min")
+        )
+        
+    elif configs.trainer.save_checkpoint_n_steps and configs.trainer.save_checkpoint_n_steps > 0:
+        callbacks.append(
+            CheckpointEveryNSteps(configs.trainer.save_checkpoint_n_steps)
         )
 
     trainer_config = {
